@@ -1,0 +1,16 @@
+{
+  "name": "job-auto-apply",
+  "version": "1.0.0",
+  "description": "",
+  "main": "apply.js",
+  "scripts": {
+    "apply": "node apply.js",
+    "test": "node --test"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "playwright": "^1.60.0"
+  }
+}

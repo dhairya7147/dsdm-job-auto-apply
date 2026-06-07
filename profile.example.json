@@ -1,0 +1,66 @@
+{
+  "firstName": "Jane",
+  "middleName": "Alex",
+  "lastName": "Doe",
+  "fullName": "Jane Alex Doe",
+  "preferredName": "Jane",
+  "email": "jane.doe@example.com",
+  "phone": "+1 555 010 1234",
+  "city": "New York",
+  "state": "New York",
+  "postalCode": "10001",
+  "streetAddress": "123 Example Street",
+  "country": "United States",
+  "linkedin": "https://www.linkedin.com/in/jane-doe",
+  "github": "https://github.com/jane-doe",
+  "portfolio": "https://jane.example.com",
+  "resume": "./resume.pdf",
+  "currentEmployer": "Example Corp",
+  "currentTitle": "Software Engineer",
+  "yearsOfExperience": "3",
+  "highestDegree": "Bachelor of Technology",
+  "university": "Example University",
+  "fieldOfStudy": "Computer Science",
+  "graduationYear": "2023",
+  "gender": "Prefer not to say",
+  "pronouns": "She/Her",
+  "workAuthorizationByCountry": {
+    "United States": "Yes",
+    "default": "No"
+  },
+  "sponsorshipRequiredByCountry": {
+    "United States": "No",
+    "default": "Yes"
+  },
+  "nonCompete": "No",
+  "previousEmployee": "No",
+  "willingToRelocate": "Yes",
+  "workplacePreferences": ["Remote", "Hybrid"],
+  "noticePeriod": "2 weeks",
+  "employmentTypes": ["Full-time"],
+  "desiredSalary": {
+    "amount": 150000,
+    "currency": "USD",
+    "period": "year",
+    "display": "USD 150,000"
+  },
+  "languages": [
+    {
+      "name": "English",
+      "proficiency": "Native or bilingual"
+    }
+  ],
+  "demographics": {
+    "hispanicOrLatino": "Prefer not to answer",
+    "raceEthnicity": "Prefer not to answer",
+    "raceEthnicityDetail": null,
+    "veteranStatus": "Prefer not to answer",
+    "disabilityStatus": "Prefer not to answer",
+    "lgbtq": "Prefer not to answer",
+    "transgender": "Prefer not to answer"
+  },
+  "minimumAgeConfirmed": true,
+  "automateDemographics": false,
+  "autoAcknowledgePrivacyReceipt": false,
+  "source": "Company website"
+}
