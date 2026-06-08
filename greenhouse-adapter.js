@@ -1,11 +1,10 @@
 const path = require("path");
-const { getAnswer, normalizeQuestion } = require("./answer-engine");
-const { fillField, selectOption } = require("./greenhouse-helper");
+const { formatCompanyName, getAnswer, normalizeQuestion } = require("./answer-engine");
+const { escapeRegExp, fillField, selectOption } = require("./greenhouse-helper");
 
 const FIELD_SELECTOR = [
-    "input:not([type='hidden']):not([type='submit']):not([type='button'])",
     "textarea",
-    "select",
+    "input:not([type='hidden']):not([type='submit']):not([type='button']):not([id^='security-input']):not([role='combobox'])",
     "[role='combobox']"
 ].join(",");
 
@@ -98,11 +97,17 @@ async function fillKnownFields(root, profile, emit, context = {}) {
         }
 
         const name = await field.getAttribute("name") || await field.getAttribute("id") || `field-${index}`;
+        if (name.startsWith("security-input") || /verification code|security code/i.test(name)) {
+            continue;
+        }
         if (handledNames.has(name) && type === "radio") {
             continue;
         }
 
         const label = normalizeQuestion(await getFieldLabel(field));
+        if (/verification code|security code|confirm you're a human/i.test(label)) {
+            continue;
+        }
         const answer = getAnswer(label, profile, context);
         handledNames.add(name);
 
@@ -113,12 +118,25 @@ async function fillKnownFields(root, profile, emit, context = {}) {
             continue;
         }
 
+        let fallback = null;
+        if (/^school\b/i.test(label) || /^school--/i.test(name)) {
+            fallback = "Other";
+        }
+
         try {
-            await fillField(field, answer);
+            const role = (await field.getAttribute("role") || "").toLowerCase();
+            if (role === "combobox") {
+                await selectOption(field, answer, root, fallback);
+            } else {
+                await fillField(field, answer, root);
+            }
             filled += 1;
             emit("field_filled", { field: label || name });
         } catch (error) {
             emit("field_failed", { field: label || name, message: error.message });
+            if (label && !unanswered.includes(label)) {
+                unanswered.push(label);
+            }
         }
     }
 
@@ -160,6 +178,26 @@ async function findManualReviewFields(root) {
     return labels;
 }
 
+async function detectCompanyName(page) {
+    const title = await page.title().catch(() => "");
+    const titleMatch = title.match(/\bat\s+(.+?)\s*$/i);
+    if (titleMatch) {
+        return titleMatch[1].trim();
+    }
+
+    try {
+        const { hostname, pathname } = new URL(page.url());
+        const segments = pathname.split("/").filter(Boolean);
+        if (/greenhouse\.io$/i.test(hostname) && segments.length > 0) {
+            return formatCompanyName(segments[0]);
+        }
+    } catch {
+        return null;
+    }
+
+    return null;
+}
+
 async function detectTargetCountry(page, root) {
     const text = [
         await page.locator("body").innerText().catch(() => ""),
@@ -183,23 +221,107 @@ async function detectTargetCountry(page, root) {
     ) || null;
 }
 
-async function fillLocationCombobox(root, profile, emit) {
+async function findEducationSelect(root, fieldName) {
+    const selectors = [
+        `select#${fieldName}--0`,
+        `select[id^="${fieldName}"]`,
+        `select[name*="${fieldName}"]`
+    ];
+
+    for (const selector of selectors) {
+        const field = root.locator(selector).first();
+        if (await field.count() > 0) {
+            return field;
+        }
+    }
+
+    return null;
+}
+
+async function fillEducationFields(root, profile, emit) {
+    await root.locator("select[id^='school'], .education--form").first()
+        .waitFor({ state: "attached", timeout: 20000 })
+        .catch(() => {});
+    await root.locator(".education--form, select[id^='school']").first().scrollIntoViewIfNeeded().catch(() => {});
+    await root.waitForTimeout(1000);
+
     const candidates = [
-        { selector: "#country", value: profile.country, field: "country" },
-        { selector: "#candidate-location", value: profile.city, field: "city" }
+        { field: "school", label: "School", value: profile.university, fallback: "Other" },
+        { field: "degree", label: "Degree", value: profile.highestDegree || "Bachelor's Degree", fallback: null },
+        { field: "discipline", label: "Discipline", value: profile.fieldOfStudy, fallback: null }
     ];
 
     for (const candidate of candidates) {
         if (!candidate.value) continue;
-        const field = root.locator(candidate.selector).first();
-        if (await field.count() === 0 || !await field.isVisible().catch(() => false)) continue;
+
+        let field = await findEducationSelect(root, candidate.field);
+        if (!field) {
+            const row = root.locator(".education--form .field, .education--form .application-question")
+                .filter({ hasText: new RegExp(`^${candidate.label}`, "i") })
+                .first();
+            field = row.locator("select, button, [role='combobox']").first();
+            if (await field.count() === 0) {
+                emit("field_failed", { field: candidate.field, message: "Education field not found" });
+                continue;
+            }
+        }
 
         try {
-            await selectOption(field, candidate.value);
+            await selectOption(field, candidate.value, root, candidate.fallback);
             emit("field_filled", { field: candidate.field });
         } catch (error) {
-            emit("field_failed", { field: candidate.field, message: error.message });
+            if (candidate.fallback) {
+                try {
+                    await selectOption(field, candidate.fallback, root);
+                    emit("field_filled", { field: candidate.field, usedFallback: true });
+                } catch (fallbackError) {
+                    emit("field_failed", { field: candidate.field, message: fallbackError.message });
+                }
+            } else {
+                emit("field_failed", { field: candidate.field, message: error.message });
+            }
         }
+    }
+}
+
+async function fillLocationCombobox(root, profile, emit) {
+    if (profile.country) {
+        const countryField = root.locator("select#country, #country").first();
+        if (await countryField.count() > 0) {
+            try {
+                await selectOption(countryField, profile.country, root);
+                emit("field_filled", { field: "country" });
+            } catch (error) {
+                emit("field_failed", { field: "country", message: error.message });
+            }
+        }
+    }
+
+    if (!profile.city) {
+        return;
+    }
+
+    const cityField = root.locator("#candidate-location, input[name='candidate-location']").first();
+    if (await cityField.count() === 0 || !await cityField.isVisible().catch(() => false)) {
+        return;
+    }
+
+    try {
+        await cityField.scrollIntoViewIfNeeded().catch(() => {});
+        await cityField.click();
+        await cityField.fill(profile.city);
+        await root.waitForTimeout(600);
+
+        const cityOption = root.getByRole("option").filter({ hasText: new RegExp(escapeRegExp(profile.city), "i") }).first();
+        if (await cityOption.isVisible().catch(() => false)) {
+            await cityOption.click();
+        } else {
+            await cityField.press("Enter");
+        }
+
+        emit("field_filled", { field: "city" });
+    } catch (error) {
+        emit("field_failed", { field: "city", message: error.message });
     }
 }
 
@@ -208,14 +330,17 @@ async function prepareGreenhouseApplication(page, profile, emit) {
     const root = await findApplicationRoot(page);
     await root.locator(FIELD_SELECTOR).first().waitFor({ state: "visible", timeout: 15000 });
     const targetCountry = await detectTargetCountry(page, root);
+    const companyName = await detectCompanyName(page);
     emit("target_country_detected", { targetCountry });
+    emit("company_detected", { companyName });
     await fillLocationCombobox(root, profile, emit);
-    const result = await fillKnownFields(root, profile, emit, { targetCountry });
+    const result = await fillKnownFields(root, profile, emit, { targetCountry, companyName });
     const resumeUploaded = await uploadResume(root, profile, emit);
     const manualReviewRequired = await findManualReviewFields(root);
 
     return {
         provider: "greenhouse",
+        companyName,
         targetCountry,
         filled: result.filled,
         unanswered: result.unanswered,
@@ -226,6 +351,7 @@ async function prepareGreenhouseApplication(page, profile, emit) {
 
 module.exports = {
     activateApplication,
+    detectCompanyName,
     detectTargetCountry,
     findApplicationRoot,
     findManualReviewFields,

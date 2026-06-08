@@ -8,11 +8,13 @@ const QUESTION_RULES = [
 
     // Demographics
     { pattern: /hispanic|latino|latina|latinx/i, key: "demographics.hispanicOrLatino" },
+    { pattern: /race or ethnicity/i, key: "demographics.raceEthnicityDetail" },
     { pattern: /race|ethnicity|ethnic background/i, key: "demographics.raceEthnicity" },
     { pattern: /veteran|military service/i, key: "demographics.veteranStatus" },
     { pattern: /disability|disabled/i, key: "demographics.disabilityStatus" },
     { pattern: /lgbtq|sexual orientation/i, key: "demographics.lgbtq" },
     { pattern: /transgender|trans identity/i, key: "demographics.transgender" },
+    { pattern: /gender identity/i, key: "demographics.genderIdentity" },
     { pattern: /\bgender\b/i, key: "gender" },
 
     // Company-specific
@@ -63,12 +65,21 @@ const QUESTION_RULES = [
     { pattern: /field of study|major|discipline/i, key: "fieldOfStudy" },
     { pattern: /graduation year|year graduated/i, key: "graduationYear" },
 
+    // Location screening
+    { pattern: /currently located in (the )?(us|united states)/i, key: "currentlyInUS" },
+    { pattern: /bay area/i, key: "bayAreaRelocation" },
+
     // Availability
     { pattern: /willing.*relocat|open to relocat/i, key: "willingToRelocate" },
     { pattern: /notice period|available to start|start date/i, key: "noticePeriod" },
 
     // Compensation
     { pattern: /salary expectation|expected salary|desired salary|compensation expectation/i, key: "desiredSalary.display" },
+
+    // Short/alternate forms
+    { pattern: /\bdegree\b/i, key: "highestDegree" },
+    { pattern: /\bschool\b/i, key: "university" },
+    { pattern: /\bwebsite\b/i, key: "portfolio" },
 
     // Technical skills - order matters (more specific patterns first)
     { pattern: /dsa\b|data structure.*algorithm|algorithm.*data structure/i, key: "technicalSkills.dsa" },
@@ -85,6 +96,7 @@ const QUESTION_RULES = [
 
     // Motivation
     { pattern: /why.*(interested|apply)|interest in (this|the) (role|position)/i, key: "genericMotivation" }
+    ,{ pattern: /why do you want to work/i, key: "genericMotivation" }
 ];
 
 function getValue(profile, key) {
@@ -110,8 +122,57 @@ function normalizeQuestion(question) {
         .trim();
 }
 
+function formatCompanyName(slug) {
+    if (!slug) {
+        return null;
+    }
+
+    return String(slug)
+        .split(/[-_\s]+/)
+        .filter(Boolean)
+        .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
+        .join(" ");
+}
+
+function resolveMotivationAnswer(profile, context = {}) {
+    const companyName = context.companyName || null;
+    const byCompany = profile.companyMotivations || {};
+    const companyAnswer = companyName ? byCompany[companyName] : null;
+
+    if (companyAnswer) {
+        return String(companyAnswer);
+    }
+
+    const fallback = profile.genericMotivation;
+    if (!fallback) {
+        return null;
+    }
+
+    return String(fallback).replace(/\{company\}/gi, companyName || "this company");
+}
+
 function getAnswer(question, profile, context = {}) {
     const normalized = normalizeQuestion(question);
+
+    // Prefer explicit per-question overrides provided in the profile.customAnswers
+    // Match keys case-insensitively after normalizing whitespace and punctuation.
+    if (profile && profile.customAnswers) {
+        const normalizedKeys = Object.keys(profile.customAnswers).map((k) => ({
+            key: k,
+            normalizedKey: normalizeQuestion(k).toLowerCase()
+        }));
+
+        // Match custom answers when the question contains the custom-answer key text
+        const matchEntry = normalizedKeys.find(({ normalizedKey }) => normalized.toLowerCase().includes(normalizedKey) || normalizedKey.includes(normalized.toLowerCase()));
+        if (matchEntry) {
+            const v = profile.customAnswers[matchEntry.key];
+            return v === undefined || v === null || v === "" ? null : String(v);
+        }
+    }
+
+    if (/\bcountry\b/i.test(normalized) && /\bphone\b/i.test(normalized)) {
+        return profile.country === undefined || profile.country === null || profile.country === "" ? null : String(profile.country);
+    }
 
     if (/(authorized|authorised).*(work|employment)|(work|employment).*(authorized|authorised)/i.test(normalized)) {
         return getCountryAnswer(profile.workAuthorizationByCountry, context.targetCountry);
@@ -127,12 +188,18 @@ function getAnswer(question, profile, context = {}) {
         return null;
     }
 
+    if (rule.key === "genericMotivation") {
+        return resolveMotivationAnswer(profile, context);
+    }
+
     const answer = getValue(profile, rule.key);
     return answer === undefined || answer === null || answer === "" ? null : String(answer);
 }
 
 module.exports = {
+    formatCompanyName,
     getAnswer,
     getCountryAnswer,
-    normalizeQuestion
+    normalizeQuestion,
+    resolveMotivationAnswer
 };

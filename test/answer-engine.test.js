@@ -1,6 +1,12 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
-const { getAnswer, getCountryAnswer, normalizeQuestion } = require("../answer-engine");
+const {
+    formatCompanyName,
+    getAnswer,
+    getCountryAnswer,
+    normalizeQuestion,
+    resolveMotivationAnswer
+} = require("../answer-engine");
 
 const profile = {
     firstName: "Jane",
@@ -46,4 +52,42 @@ test("resolves authorization using the job country", () => {
 
 test("normalizes labels", () => {
     assert.equal(normalizeQuestion(" First   Name * "), "First Name");
+});
+
+test("uses company-specific motivation when available", () => {
+    const motivatedProfile = {
+        ...profile,
+        genericMotivation: "I like {company}.",
+        companyMotivations: {
+            Discord: "Discord-specific answer."
+        }
+    };
+
+    assert.equal(
+        getAnswer("Why do you want to work at Discord?", motivatedProfile, { companyName: "Discord" }),
+        "Discord-specific answer."
+    );
+    assert.equal(
+        resolveMotivationAnswer(motivatedProfile, { companyName: "Stripe" }),
+        "I like Stripe."
+    );
+});
+
+test("formats greenhouse company slugs", () => {
+    assert.equal(formatCompanyName("discord"), "Discord");
+    assert.equal(formatCompanyName("airbnb-global"), "Airbnb Global");
+});
+
+test("matches location screening questions from profile", () => {
+    const locationProfile = {
+        ...profile,
+        currentlyInUS: "No",
+        bayAreaRelocation: "Yes"
+    };
+
+    assert.equal(getAnswer("Are you currently located in the US?", locationProfile), "No");
+    assert.equal(
+        getAnswer("Are you currently based in or willing to relocate to the Bay Area?", locationProfile),
+        "Yes"
+    );
 });

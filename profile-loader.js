@@ -1,5 +1,6 @@
 const fs = require("fs");
 const path = require("path");
+const { mergePendingAnswers } = require("./answer-ledger");
 
 const REQUIRED_FIELDS = [
     "firstName",
@@ -25,7 +26,7 @@ function loadProfile(profilePath) {
         throw new Error(`Resume does not exist: ${profile.resume}`);
     }
 
-    return profile;
+    return mergePendingAnswers(profile, path.dirname(resolvedPath));
 }
 
 module.exports = {

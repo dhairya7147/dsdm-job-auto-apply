@@ -5,6 +5,9 @@
   "main": "apply.js",
   "scripts": {
     "apply": "node apply.js",
+    "promote-answers": "node promote-answers.js",
+    "discover": "node discover-greenhouse.js",
+    "batch-apply": "node batch-apply.js",
     "test": "node --test"
   },
   "keywords": [],

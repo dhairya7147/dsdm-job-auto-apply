@@ -82,6 +82,30 @@ npm test
 ./mvnw test
 ```
 
+## Growing Coverage Without an LLM
+
+After each run, unanswered questions are saved to:
+
+- `artifacts/<job-id>/unanswered.json`
+- `unanswered-ledger.json` (deduped across runs)
+
+To answer new questions:
+
+1. Copy `pending-answers.example.json` to `pending-answers.json`
+2. Add question/answer pairs
+3. Re-run the application job
+4. Promote durable answers into `profile.json`:
+
+```bash
+npm run promote-answers
+```
+
+`pending-answers.json` is merged on every run. Promotion moves those answers
+into `profile.customAnswers` and clears the pending file.
+
+Use `companyMotivations` in `profile.json` for company-specific "why us?"
+answers. Use `{company}` inside `genericMotivation` as the fallback template.
+
 ## Safety Boundary
 
 The current runner never clicks a submit button. CAPTCHA, account login,

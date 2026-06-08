@@ -34,6 +34,9 @@ build/
 
 ### Local application data ###
 profile.json
+pending-answers.json
+unanswered-ledger.json
+discovered-boards.json
 artifacts/
 *.log
 *.png
