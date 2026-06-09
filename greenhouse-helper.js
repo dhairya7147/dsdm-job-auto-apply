@@ -57,8 +57,22 @@ function findBestOption(options, value) {
     }) || null;
 }
 
-function resolveOptionMatch(labels, value, fallback = null) {
-    const match = findBestOption(labels, value);
+function findStrictOption(options, value) {
+    const requested = normalize(value);
+
+    const exact = options.find((option) => normalize(option) === requested);
+    if (exact) {
+        return exact;
+    }
+
+    return options.find((option) => {
+        const candidate = normalize(option);
+        return candidate.includes(requested) || requested.includes(candidate);
+    }) || null;
+}
+
+function resolveOptionMatch(labels, value, fallback = null, strict = false) {
+    const match = strict ? findStrictOption(labels, value) : findBestOption(labels, value);
     if (match) {
         return match;
     }
@@ -98,10 +112,10 @@ async function getFieldListbox(field) {
     return field.page().locator("[role='listbox']").last();
 }
 
-async function clickOption(field, value, fallback = null) {
+async function clickOption(field, value, fallback = null, strict = false) {
     const listbox = await getFieldListbox(field);
     const options = await listbox.getByRole("option").allTextContents();
-    const match = resolveOptionMatch(options, value, fallback);
+    const match = resolveOptionMatch(options, value, fallback, strict);
 
     if (!match) {
         return false;
@@ -111,10 +125,69 @@ async function clickOption(field, value, fallback = null) {
     return true;
 }
 
-async function selectGreenhouseFlyout(root, field, value, fallback = null) {
+async function commitComboboxValue(field, value) {
+    const current = (await field.inputValue().catch(() => "")).trim();
+    if (!current || !optionMatches(current, value)) {
+        return false;
+    }
+
+    await field.press("Enter");
+    await dispatchFieldEvents(field);
+    return true;
+}
+
+async function selectGreenhouseFlyout(root, field, value, fallback = null, strict = false) {
     await field.scrollIntoViewIfNeeded().catch(() => {});
     await root.keyboard.press("Escape").catch(() => {});
     await root.waitForTimeout(150);
+
+    const fieldId = await field.getAttribute("id") || "";
+    const fieldName = [
+        await field.getAttribute("aria-label"),
+        await field.getAttribute("name"),
+        fieldId
+    ].filter(Boolean).join(" ");
+    const isSchool = /^school--/i.test(fieldId) || /\bschool\b/i.test(fieldName);
+    const searchable = isSchool || /discipline/i.test(fieldName);
+    const targetValue = isSchool ? "Other" : value;
+    const targetFallback = isSchool ? null : fallback;
+
+    if (searchable) {
+        await field.click();
+        await field.fill(String(targetValue));
+
+        for (let attempt = 0; attempt < 6; attempt += 1) {
+            await root.waitForTimeout(400);
+            if (await commitComboboxValue(field, targetValue)) {
+                await root.keyboard.press("Escape").catch(() => {});
+                return;
+            }
+        }
+
+        if (isSchool) {
+            await field.press("Enter");
+            await dispatchFieldEvents(field);
+            await root.keyboard.press("Escape").catch(() => {});
+            return;
+        }
+
+        if (targetFallback) {
+            await field.fill(String(targetFallback));
+            for (let attempt = 0; attempt < 6; attempt += 1) {
+                await root.waitForTimeout(400);
+                if (await commitComboboxValue(field, targetFallback)) {
+                    await root.keyboard.press("Escape").catch(() => {});
+                    return;
+                }
+            }
+        }
+
+        if (await clickOption(field, targetValue, targetFallback, strict)) {
+            await dispatchFieldEvents(field);
+            await root.keyboard.press("Escape").catch(() => {});
+            return;
+        }
+    }
 
     const toggle = await getFlyoutToggle(field);
     if (await toggle.count() > 0) {
@@ -125,30 +198,13 @@ async function selectGreenhouseFlyout(root, field, value, fallback = null) {
 
     await root.waitForTimeout(300);
 
-    const fieldName = await field.getAttribute("aria-label") || await field.getAttribute("name") || "";
-    const searchable = /school|discipline/i.test(fieldName);
-    if (searchable) {
-        await field.fill(String(value));
-        await root.waitForTimeout(600);
-    }
-
-    if (await clickOption(field, value, fallback)) {
+    if (await clickOption(field, value, fallback, strict)) {
         await dispatchFieldEvents(field);
         await root.keyboard.press("Escape").catch(() => {});
         return;
     }
 
-    if (fallback && searchable) {
-        await field.fill(String(fallback));
-        await root.waitForTimeout(600);
-        if (await clickOption(field, fallback)) {
-            await dispatchFieldEvents(field);
-            await root.keyboard.press("Escape").catch(() => {});
-            return;
-        }
-    }
-
-    if (!searchable && fallback && await clickOption(field, fallback)) {
+    if (fallback && await clickOption(field, fallback, null, strict)) {
         await dispatchFieldEvents(field);
         await root.keyboard.press("Escape").catch(() => {});
         return;
@@ -232,13 +288,13 @@ async function fillField(field, value, root = null) {
     await dispatchFieldEvents(field);
 }
 
-async function selectOption(field, value, root = null, fallback = null) {
+async function selectOption(field, value, root = null, fallback = null, strict = false) {
     const role = normalize(await field.getAttribute("role"));
     const tagName = await field.evaluate((element) => element.tagName.toLowerCase());
     const scope = root || field.page();
 
     if (role === "combobox") {
-        await selectGreenhouseFlyout(scope, field, value, fallback);
+        await selectGreenhouseFlyout(scope, field, value, fallback, strict);
         return;
     }
 
@@ -247,7 +303,7 @@ async function selectOption(field, value, root = null, fallback = null) {
         return;
     }
 
-    await selectGreenhouseFlyout(scope, field, value, fallback);
+    await selectGreenhouseFlyout(scope, field, value, fallback, strict);
 }
 
 module.exports = {

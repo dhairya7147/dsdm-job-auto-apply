@@ -1,3 +1,10 @@
+const {
+    isSponsorshipQuestion,
+    isWorkAuthorizationQuestion,
+    resolveAuthorizationAnswer
+} = require("./authorization-policy");
+const { resolveExperienceBracketAnswer } = require("./experience-policy");
+
 const QUESTION_RULES = [
     // General patterns - most specific first
     { pattern: /consent to privacy notice/i, key: "consentToPrivacyNotice" },
@@ -28,8 +35,61 @@ const QUESTION_RULES = [
 
     // General work history
     { pattern: /non[- ]?compete/i, key: "nonCompete" },
+    { pattern: /employment agreements.*post-employment restrictions|agreements that may restrict your ability/i, key: "nonCompete" },
     { pattern: /(previously|ever).*(worked|employed)|worked.*(before|previously)/i, key: "previousEmployee" },
+    { pattern: /employed by .* in the past|been employed by .* entity/i, key: "previousEmployee" },
+    { pattern: /current or former .* employee|alphabet employee|deloitte/i, key: "previousEmployee" },
 
+    // Compliance and consent
+    { pattern: /government official|close relative.*government|public official/i, key: "governmentOfficial" },
+    { pattern: /interview.*record|ai notetaker|transcribe.*interview|ai to transcribe/i, key: "interviewRecordingConsent" },
+    { pattern: /ai policy|ai responsible use|may use ai tools to assist/i, key: "aiPolicyConsent" },
+    { pattern: /sanctions and export controls/i, key: "sanctionsCompliance" },
+
+    // Screening
+    { pattern: /phd/i, key: "hasPhd" },
+    { pattern: /hybrid.*office|in-person.*office|days a week in office|in office.*days|office-centric hybrid|able to meet this requirement/i, key: "hybridOfficeWilling" },
+    { pattern: /marketing communications|stay up to date|company and product news/i, key: "marketingOptIn" },
+    { pattern: /know anyone who works|family member.*employee|relative.*working/i, key: "knowEmployeeAtCompany" },
+    { pattern: /optional practical training/i, key: "optStatus" },
+    { pattern: /6 years of data\/analytics engineering/i, key: "sixYearsDataExperience" },
+    { pattern: /5 years of full time relevant/i, key: "fiveYearsExperience" },
+    { pattern: /10\+ years of total relevant technical/i, key: "tenYearsTechnical" },
+    { pattern: /deadlines or timeline considerations/i, key: "timelineConsiderations" },
+    { pattern: /interviewed at .* before/i, key: "previousInterview" },
+    { pattern: /applied to .* in the last/i, key: "recentApplication" },
+    { pattern: /fluent or proficient in arabic/i, key: "speaksArabic" },
+    { pattern: /familiarity with artificial intelligence/i, key: "aiFamiliarityRating" },
+    { pattern: /preferred coding language/i, key: "preferredCodingLanguage" },
+    { pattern: /front end and back end languages/i, key: "codingLanguages" },
+    { pattern: /languages you speak fluently/i, key: "languagesSpoken" },
+    { pattern: /from where do you intend to work/i, key: "workLocationPreference" },
+    { pattern: /cumulative gpa/i, key: "gpa" },
+    { pattern: /where are you currently based/i, key: "currentLocation" },
+    { pattern: /additional information/i, key: "additionalInformation" },
+    { pattern: /core technical stack/i, key: "coreTechnicalStack" },
+    { pattern: /english level|proficiency in english|advanced english level/i, key: "englishLevel" },
+    { pattern: /earliest you would want to start|earliest start/i, key: "earliestStartDate" },
+    { pattern: /name pronunciation/i, key: "namePronunciation" },
+    { pattern: /contact your current employer/i, key: "contactCurrentEmployer" },
+    { pattern: /reasonable accommodation/i, key: "reasonableAccommodation" },
+    { pattern: /military status/i, key: "militaryStatus" },
+    { pattern: /current salary|current total salary/i, key: "currentSalary" },
+    { pattern: /finra license/i, key: "finraLicenses" },
+    { pattern: /in-person 5 days|five days a week|four days a week|office at least two days|office-centric hybrid|commutable distance to austin/i, key: "onsiteRequirementWilling" },
+    { pattern: /ready to relocate to mumbai|relocate to mumbai/i, key: "mumbaiRelocation" },
+    { pattern: /may we contact your current employer/i, key: "contactCurrentEmployer" },
+    { pattern: /salary increment expectation|salary expectation/i, key: "salaryExpectation" },
+    { pattern: /gitlab username/i, key: "gitlabUsername" },
+    { pattern: /roblox username/i, key: "robloxUsername" },
+    { pattern: /fluent french/i, key: "speaksFrench" },
+    { pattern: /fluent or proficient in arabic/i, key: "speaksArabic" },
+    { pattern: /currently enrolled as a student/i, key: "isStudent" },
+    { pattern: /public company experience/i, key: "publicCompanyExperience" },
+    { pattern: /experience using airtable/i, key: "airtableExperience" },
+    { pattern: /using looker/i, key: "lookerExperience" },
+    { pattern: /whatsapp messages from stripe/i, key: "whatsappRecruitingOptIn" },
+    { pattern: /business trips every/i, key: "businessTravelWilling" },
     // Source & links
     { pattern: /hear about|how did you find|source/i, key: "source" },
     { pattern: /linkedin/i, key: "linkedin" },
@@ -56,7 +116,7 @@ const QUESTION_RULES = [
 
     // Work experience
     { pattern: /current (company|employer)|where do you currently work/i, key: "currentEmployer" },
-    { pattern: /current (job )?title|current role/i, key: "currentTitle" },
+    { pattern: /current (or )?(more |most )?recent (job )?title|current (job )?title|current role/i, key: "currentTitle" },
     { pattern: /years? of (professional |relevant )?experience|how many years/i, key: "yearsOfExperience" },
 
     // Education
@@ -94,9 +154,31 @@ const QUESTION_RULES = [
     { pattern: /api.*test|test.*api/i, key: "technicalSkills.apiTesting" },
     { pattern: /database.*test|test.*database/i, key: "technicalSkills.databaseTesting" },
 
-    // Motivation
-    { pattern: /why.*(interested|apply)|interest in (this|the) (role|position)/i, key: "genericMotivation" }
-    ,{ pattern: /why do you want to work/i, key: "genericMotivation" }
+    // Motivation & essays
+    { pattern: /why.*(interested|apply|join)|interest in (this|the) (role|position|company|opportunity)/i, key: "genericMotivation" },
+    { pattern: /why do you want to work/i, key: "genericMotivation" },
+    { pattern: /why\s+\w+/i, key: "genericMotivation" },
+    { pattern: /what excites you/i, key: "excitementAnswer" },
+    { pattern: /which .* value resonates|values can be found on our careers page/i, key: "companyValuesAnswer" },
+    { pattern: /first-generation professional/i, key: "firstGenerationProfessional" },
+    { pattern: /future job opportunities/i, key: "futureOpportunitiesOptIn" },
+    { pattern: /receive alerts for similar jobs/i, key: "jobAlertsOptIn" },
+    { pattern: /address from which you plan on working/i, key: "workFromAddress" },
+    { pattern: /generative ai demonstrating|leverage ai\/agentic tools/i, key: "genAiToolExperience" },
+    { pattern: /engineering management experience/i, key: "engineeringManagementExperience" },
+    { pattern: /today.?s date of application/i, key: "applicationDate" },
+    { pattern: /applicant privacy notice|consent to privacy notice|candidate non-disclosure/i, key: "consentAcknowledgement" },
+    { pattern: /scripting language.*rest apis.*graphql/i, key: "scriptingApiProficiency" },
+    { pattern: /accessible and inclusive interview/i, key: "reasonableAccommodation" },
+    { pattern: /double-check all the information/i, key: "informationAccuracyConfirm" },
+    { pattern: /personal preferences/i, key: "personalPreferences" },
+    { pattern: /other social accounts/i, key: "linkedin" },
+    { pattern: /nickname/i, key: "nickname" },
+    { pattern: /ads products/i, key: "adsProductsExperience" },
+    { pattern: /conversion modeling or ranking/i, key: "conversionModelingExperience" },
+    { pattern: /applied to this role before/i, key: "appliedToRoleBefore" },
+    { pattern: /nationality/i, key: "nationality" },
+    { pattern: /family status/i, key: "familyStatus" }
 ];
 
 function getValue(profile, key) {
@@ -151,6 +233,14 @@ function resolveMotivationAnswer(profile, context = {}) {
     return String(fallback).replace(/\{company\}/gi, companyName || "this company");
 }
 
+function getApplicationDate() {
+    const now = new Date();
+    const mm = String(now.getMonth() + 1).padStart(2, "0");
+    const dd = String(now.getDate()).padStart(2, "0");
+    const yy = String(now.getFullYear()).slice(-2);
+    return `${mm}/${dd}/${yy}`;
+}
+
 function getAnswer(question, profile, context = {}) {
     const normalized = normalizeQuestion(question);
 
@@ -174,12 +264,17 @@ function getAnswer(question, profile, context = {}) {
         return profile.country === undefined || profile.country === null || profile.country === "" ? null : String(profile.country);
     }
 
-    if (/(authorized|authorised).*(work|employment)|(work|employment).*(authorized|authorised)/i.test(normalized)) {
-        return getCountryAnswer(profile.workAuthorizationByCountry, context.targetCountry);
+    if (isWorkAuthorizationQuestion(normalized)) {
+        return resolveAuthorizationAnswer("authorized", normalized, profile, context);
     }
 
-    if (/sponsor|sponsorship/i.test(normalized)) {
-        return getCountryAnswer(profile.sponsorshipRequiredByCountry, context.targetCountry);
+    if (isSponsorshipQuestion(normalized)) {
+        return resolveAuthorizationAnswer("sponsorship", normalized, profile, context);
+    }
+
+    const experienceAnswer = resolveExperienceBracketAnswer(normalized, profile);
+    if (experienceAnswer) {
+        return experienceAnswer;
     }
 
     const rule = QUESTION_RULES.find(({ pattern }) => pattern.test(normalized));
@@ -192,6 +287,18 @@ function getAnswer(question, profile, context = {}) {
         return resolveMotivationAnswer(profile, context);
     }
 
+    if (rule.key === "minimumAgeConfirmed") {
+        return profile.minimumAgeConfirmed ? "Yes" : "No";
+    }
+
+    if (rule.key === "applicationDate") {
+        return getApplicationDate();
+    }
+
+    if (rule.key === "consentAcknowledgement") {
+        return profile.consentAcknowledgement || "Yes";
+    }
+
     const answer = getValue(profile, rule.key);
     return answer === undefined || answer === null || answer === "" ? null : String(answer);
 }
@@ -201,5 +308,8 @@ module.exports = {
     getAnswer,
     getCountryAnswer,
     normalizeQuestion,
-    resolveMotivationAnswer
+    resolveMotivationAnswer,
+    resolveAuthorizationAnswer,
+    isWorkAuthorizationQuestion,
+    isSponsorshipQuestion
 };

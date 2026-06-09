@@ -7,6 +7,10 @@
     "apply": "node apply.js",
     "promote-answers": "node promote-answers.js",
     "discover": "node discover-greenhouse.js",
+    "harvest-questions": "node harvest-questions.js",
+    "sync-pending": "node sync-pending-answers.js",
+    "finish-pending": "node finish-pending.js",
+    "sweep": "node sweep-greenhouse.js",
     "batch-apply": "node batch-apply.js",
     "test": "node --test"
   },

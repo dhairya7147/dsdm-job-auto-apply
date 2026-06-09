@@ -11,18 +11,14 @@ const {
 const profile = {
     firstName: "Jane",
     state: "New York",
+    country: "India",
+    citizenship: "India",
     currentEmployer: "Example Corp",
     desiredSalary: {
         display: "USD 150,000"
     },
-    workAuthorizationByCountry: {
-        India: "Yes",
-        default: "No"
-    },
-    sponsorshipRequiredByCountry: {
-        India: "No",
-        default: "Yes"
-    },
+    workAuthorizationByCountry: {},
+    sponsorshipRequiredByCountry: {},
     source: "Company website"
 };
 
@@ -33,9 +29,12 @@ test("matches common application questions", () => {
     assert.equal(getAnswer("What is your expected salary?", profile), "USD 150,000");
 });
 
-test("does not invent an answer", () => {
-    assert.equal(getAnswer("Are you authorized to work in the United Kingdom?", profile), null);
-    assert.equal(getAnswer("Will you require sponsorship?", profile), null);
+test("derives authorization answers from citizenship when country is known", () => {
+    assert.equal(getAnswer("Are you authorized to work in the United Kingdom?", profile), "No");
+    assert.equal(
+        getAnswer("Will you require sponsorship?", profile, { targetCountry: "United Kingdom" }),
+        "Yes"
+    );
 });
 
 test("resolves authorization using the job country", () => {

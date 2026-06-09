@@ -1,12 +1,7 @@
 const https = require("https");
+const { uniqueBoards } = require("./greenhouse-boards");
 
-const BOARDS = [
-    "discord", "stripe", "figma", "notion", "airbnb", "cloudflare", "gitlab",
-    "mongodb", "reddit", "doordash", "instacart", "pinterest", "lyft", "block",
-    "asana", "dropbox", "hubspot", "twilio", "okta", "snowflake", "ramp", "brex",
-    "plaid", "scaleai", "anthropic", "openai", "vercel", "linear", "retool",
-    "carta", "gusto", "hashicorp", "databricks", "coinbase", "robinhood"
-];
+const BOARDS = uniqueBoards();
 
 function fetchJson(url) {
     return new Promise((resolve, reject) => {
@@ -69,4 +64,4 @@ if (require.main === module) {
         });
 }
 
-module.exports = { BOARDS, discover };
+module.exports = { BOARDS, discover, uniqueBoards };

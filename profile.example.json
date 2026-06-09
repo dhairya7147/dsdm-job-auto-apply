@@ -11,6 +11,7 @@
   "postalCode": "10001",
   "streetAddress": "123 Example Street",
   "country": "United States",
+  "citizenship": "United States",
   "linkedin": "https://www.linkedin.com/in/jane-doe",
   "github": "https://github.com/jane-doe",
   "portfolio": "https://jane.example.com",

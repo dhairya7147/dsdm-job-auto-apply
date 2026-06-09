@@ -1,4 +1,5 @@
 const path = require("path");
+const { extractCountryFromText } = require("./authorization-policy");
 const { formatCompanyName, getAnswer, normalizeQuestion } = require("./answer-engine");
 const { escapeRegExp, fillField, selectOption } = require("./greenhouse-helper");
 
@@ -118,15 +119,15 @@ async function fillKnownFields(root, profile, emit, context = {}) {
             continue;
         }
 
-        let fallback = null;
+        let fillAnswer = answer;
         if (/^school\b/i.test(label) || /^school--/i.test(name)) {
-            fallback = "Other";
+            fillAnswer = "Other";
         }
 
         try {
             const role = (await field.getAttribute("role") || "").toLowerCase();
             if (role === "combobox") {
-                await selectOption(field, answer, root, fallback);
+                await selectOption(field, fillAnswer, root);
             } else {
                 await fillField(field, answer, root);
             }
@@ -203,22 +204,8 @@ async function detectTargetCountry(page, root) {
         await page.locator("body").innerText().catch(() => ""),
         await root.locator("body").innerText().catch(() => "")
     ].join(" ");
-    const knownCountries = [
-        "India",
-        "United Kingdom",
-        "United States",
-        "Canada",
-        "Australia",
-        "Germany",
-        "France",
-        "Ireland",
-        "Netherlands",
-        "Singapore"
-    ];
 
-    return knownCountries.find((country) =>
-        new RegExp(`\\b${country.replace(/\s+/g, "\\s+")}\\b`, "i").test(text)
-    ) || null;
+    return extractCountryFromText(text);
 }
 
 async function findEducationSelect(root, fieldName) {

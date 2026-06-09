@@ -13,7 +13,7 @@ const {
 test("cleans noisy greenhouse labels", () => {
     assert.equal(
         cleanQuestionLabel("Website Website question_36487438002"),
-        "Website Website"
+        "Website"
     );
 });
 
@@ -45,18 +45,26 @@ test("records unanswered questions in the ledger and artifact file", () => {
     assert.equal(fs.existsSync(path.join(directory, "unanswered-ledger.json")), true);
 });
 
-test("promotes pending answers into profile.json", () => {
+test("promotes filled pending answers and keeps empty ones", () => {
     const directory = fs.mkdtempSync(path.join(os.tmpdir(), "job-auto-apply-"));
     const profilePath = path.join(directory, "profile.json");
-    fs.writeFileSync(profilePath, JSON.stringify({ customAnswers: {} }));
+    fs.writeFileSync(profilePath, JSON.stringify({ customAnswers: {}, companyMotivations: {} }));
     fs.writeFileSync(path.join(directory, "pending-answers.json"), JSON.stringify({
-        "Why Example?": "Because."
+        "Why Example?": "Because.",
+        "GitHub": "https://github.com/example",
+        "Website": "",
+        "Are you legally authorized to work in the United States?": "No"
     }));
 
     const result = promotePendingAnswers(profilePath, directory);
     const profile = JSON.parse(fs.readFileSync(profilePath, "utf8"));
+    const remaining = JSON.parse(fs.readFileSync(path.join(directory, "pending-answers.json"), "utf8"));
 
-    assert.equal(result.promoted, 1);
-    assert.equal(profile.customAnswers["Why Example?"], "Because.");
-    assert.equal(fs.existsSync(path.join(directory, "pending-answers.json")), false);
+    assert.equal(result.promoted, 2);
+    assert.equal(result.skippedAuthorization, 1);
+    assert.equal(result.keptEmpty, 1);
+    assert.equal(profile.companyMotivations.Example, "Because.");
+    assert.equal(profile.github, "https://github.com/example");
+    assert.equal(remaining.Website, "");
+    assert.equal(remaining["Are you legally authorized to work in the United States?"], undefined);
 });
