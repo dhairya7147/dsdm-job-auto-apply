@@ -1,4 +1,4 @@
-const { runStandalone } = require("./apply-runner");
+const { runStandalone } = require("./src/core/apply-runner");
 
 function parseArguments(argv) {
     const options = {

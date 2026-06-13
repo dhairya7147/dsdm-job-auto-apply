@@ -82,16 +82,48 @@ npm test
 ./mvnw test
 ```
 
+## Project Layout
+
+```
+apply.js                 # CLI entry (also used by Spring Boot API)
+profile.json             # Your answers and resume path (gitignored)
+
+src/
+  core/                  # Shared engine: answers, profile, runner, registry
+  cli/                   # Batch runners, sync/promote pending answers
+  platforms/
+    greenhouse/          # Greenhouse adapter, helper, discovery tools
+    workday/             # Workday adapter, auth, metadata
+    ashby/               # Ashby adapter, helper, metadata
+
+data/
+  pending-answers.json   # Fill-in answers for new questions (gitignored)
+  unanswered-ledger.json # Deduped question ledger (gitignored)
+  greenhouse/job-urls.json
+  workday/job-urls.json
+  ashby/job-urls.json
+
+scripts/
+  workday/               # Workday debug and e2e scripts
+  ashby/                 # Ashby debug scripts
+
+test/
+  core/                  # Engine and policy tests
+  greenhouse/
+  workday/
+  ashby/
+```
+
 ## Growing Coverage Without an LLM
 
 After each run, unanswered questions are saved to:
 
 - `artifacts/<job-id>/unanswered.json`
-- `unanswered-ledger.json` (deduped across runs)
+- `data/unanswered-ledger.json` (deduped across runs)
 
 To answer new questions:
 
-1. Copy `pending-answers.example.json` to `pending-answers.json`
+1. Copy `data/pending-answers.example.json` to `data/pending-answers.json`
 2. Add question/answer pairs
 3. Re-run the application job
 4. Promote durable answers into `profile.json`:
@@ -100,7 +132,7 @@ To answer new questions:
 npm run promote-answers
 ```
 
-`pending-answers.json` is merged on every run. Promotion moves those answers
+`data/pending-answers.json` is merged on every run. Promotion moves those answers
 into `profile.customAnswers` and clears the pending file.
 
 Use `companyMotivations` in `profile.json` for company-specific "why us?"
