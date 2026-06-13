@@ -17,6 +17,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -47,11 +48,20 @@ public class ApplicationJobService {
     }
 
     public ApplicationJob start(String jobUrl) {
+        return start(jobUrl, null, null, null);
+    }
+
+    public ApplicationJob start(
+            String jobUrl,
+            String jobLocation,
+            Boolean headlessOverride,
+            Long reviewTimeoutOverride
+    ) {
         validateJobUrl(jobUrl);
 
         ApplicationJob job = new ApplicationJob(UUID.randomUUID(), jobUrl);
         jobs.put(job.getId(), job);
-        executor.submit(() -> run(job));
+        executor.submit(() -> run(job, jobLocation, headlessOverride, reviewTimeoutOverride));
         return job;
     }
 
@@ -81,8 +91,10 @@ public class ApplicationJobService {
         }
     }
 
-    private void run(ApplicationJob job) {
+    private void run(ApplicationJob job, String jobLocation, Boolean headlessOverride, Long reviewTimeoutOverride) {
         Path artifactDirectory = projectDirectory.resolve("artifacts").resolve(job.getId().toString());
+        boolean runHeadless = headlessOverride != null ? headlessOverride : headless;
+        long runReviewTimeoutMs = reviewTimeoutOverride != null ? reviewTimeoutOverride : reviewTimeoutMs;
 
         try {
             Files.createDirectories(artifactDirectory);
@@ -97,12 +109,17 @@ public class ApplicationJobService {
                     "--artifact-dir",
                     artifactDirectory.toString(),
                     "--review-timeout-ms",
-                    Long.toString(reviewTimeoutMs)
+                    Long.toString(runReviewTimeoutMs)
             );
-            if (headless) {
+            if (runHeadless) {
                 processBuilder.command().add("--headless");
             }
+            if (jobLocation != null && !jobLocation.isBlank()) {
+                processBuilder.command().add("--job-location");
+                processBuilder.command().add(jobLocation);
+            }
             processBuilder.directory(projectDirectory.toFile());
+            configureChildProcessEnvironment(processBuilder.environment());
 
             Process process = processBuilder.start();
             executor.submit(() -> capture(process.getInputStream(), "stdout", job));
@@ -113,6 +130,13 @@ public class ApplicationJobService {
             job.fail("Application process was interrupted");
         } catch (IOException exception) {
             job.fail("Could not start application process: " + exception.getMessage());
+        }
+    }
+
+    private void configureChildProcessEnvironment(Map<String, String> environment) {
+        String browsersPath = environment.get("PLAYWRIGHT_BROWSERS_PATH");
+        if (browsersPath != null && browsersPath.contains("cursor-sandbox-cache")) {
+            environment.remove("PLAYWRIGHT_BROWSERS_PATH");
         }
     }
 

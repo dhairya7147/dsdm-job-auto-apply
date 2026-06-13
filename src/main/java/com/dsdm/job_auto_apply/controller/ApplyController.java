@@ -34,7 +34,12 @@ public class ApplyController {
         }
 
         try {
-            return applicationJobService.start(request.getJobUrl());
+            return applicationJobService.start(
+                    request.getJobUrl(),
+                    request.getJobLocation(),
+                    request.getHeadless(),
+                    request.getReviewTimeoutMs()
+            );
         } catch (IllegalArgumentException exception) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, exception.getMessage(), exception);
         }

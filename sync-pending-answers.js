@@ -2,25 +2,12 @@ const fs = require("fs");
 const path = require("path");
 const { cleanQuestionLabel, PENDING_FILE, LEDGER_FILE } = require("./answer-ledger");
 const { getAnswer } = require("./answer-engine");
+const { isAutoHandledQuestion } = require("./question-filters");
 const { loadProfile } = require("./profile-loader");
 
 const PROFILE_PATH = process.env.JOB_AUTO_APPLY_PROFILE || "profile.json";
 
-const IGNORE_PATTERNS = [
-    /verification code/i,
-    /security.code/i,
-    /confirm you.?re a human/i,
-    /voluntary self-identification/i,
-    /equal employment opportunity/i,
-    /government reporting purposes/i,
-    /^&lt;/i,
-    /<h3>/i,
-    /^school school--/i,
-    /^degree degree--/i,
-    /^discipline discipline--/i,
-    /^country phone$/i,
-    /^location \(city\) candidate-location$/i
-];
+const { shouldIgnoreQuestion } = require("./question-filters");
 
 function readJson(filePath, fallback) {
     if (!fs.existsSync(filePath)) {
@@ -32,11 +19,11 @@ function readJson(filePath, fallback) {
 
 function shouldSync(question, profile) {
     const cleaned = cleanQuestionLabel(question);
-    if (!cleaned || IGNORE_PATTERNS.some((pattern) => pattern.test(cleaned))) {
+    if (!cleaned || shouldIgnoreQuestion(cleaned) || isAutoHandledQuestion(cleaned, profile)) {
         return false;
     }
 
-    if (getAnswer(cleaned, profile)) {
+    if (getAnswer(cleaned, profile) !== null) {
         return false;
     }
 
@@ -56,7 +43,15 @@ function syncPendingAnswers(baseDir = process.cwd()) {
     const pending = readJson(pendingPath, {});
 
     let added = 0;
+    let removed = 0;
     const candidates = [];
+
+    for (const question of Object.keys(pending)) {
+        if (pending[question] === "" && !shouldSync(question, profile)) {
+            delete pending[question];
+            removed += 1;
+        }
+    }
 
     for (const entry of ledger.entries || []) {
         if (!shouldSync(entry.question, profile)) {
@@ -88,6 +83,7 @@ function syncPendingAnswers(baseDir = process.cwd()) {
         pendingPath,
         ledgerPath,
         added,
+        removed,
         totalPending: Object.keys(pending).length,
         unansweredStillEmpty: Object.entries(pending).filter(([, value]) => value === "").length,
         topCandidates: candidates.slice(0, 30)

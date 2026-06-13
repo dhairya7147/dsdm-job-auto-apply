@@ -9,6 +9,18 @@ const FIELD_SELECTOR = [
     "[role='combobox']"
 ].join(",");
 
+const APPLICATION_FORM_SELECTOR = [
+    "form #first_name",
+    "#first_name",
+    'input[name="first_name"]',
+    "form input[type='file']",
+    "#application-form"
+].join(", ");
+
+async function pageHasApplicationForm(page) {
+    return page.locator(APPLICATION_FORM_SELECTOR).count().then((count) => count > 0);
+}
+
 async function findApplicationRoot(page) {
     const greenhouseFrame = page.frames().find((frame) => /job_app/i.test(frame.url()));
 
@@ -16,8 +28,7 @@ async function findApplicationRoot(page) {
         return greenhouseFrame;
     }
 
-    const pageHasForm = await page.locator('form input[type="file"], form #first_name').count() > 0;
-    if (pageHasForm) {
+    if (await pageHasApplicationForm(page)) {
         return page;
     }
 
@@ -29,8 +40,21 @@ async function activateApplication(page, emit) {
         return;
     }
 
+    if (await pageHasApplicationForm(page)) {
+        emit("application_opened", { method: "inline-form" });
+        return;
+    }
+
+    const acceptButton = page.getByRole("button", { name: /accept all|agree and proceed|i agree|got it|allow all/i }).first();
+    if (await acceptButton.isVisible().catch(() => false)) {
+        await acceptButton.click().catch(() => {});
+        await page.waitForTimeout(500);
+        emit("cookie_banner_dismissed", {});
+    }
+
     const applicationTab = page.getByRole("tab", { name: /application/i }).first();
-    const applyButton = page.getByRole("button", { name: /apply now/i }).first();
+    const applyButton = page.getByRole("button", { name: /apply now|apply for this job|apply$/i }).first();
+    const applyLink = page.getByRole("link", { name: /apply now|apply for this job|apply$/i }).first();
 
     if (await applicationTab.count() > 0 && await applicationTab.isVisible().catch(() => false)) {
         await applicationTab.click();
@@ -38,13 +62,22 @@ async function activateApplication(page, emit) {
     } else if (await applyButton.count() > 0 && await applyButton.isVisible().catch(() => false)) {
         await applyButton.click();
         emit("application_opened", { method: "button" });
+    } else if (await applyLink.count() > 0 && await applyLink.isVisible().catch(() => false)) {
+        await applyLink.click();
+        emit("application_opened", { method: "link" });
     }
 
-    const deadline = Date.now() + 15000;
+    const deadline = Date.now() + 30000;
     while (Date.now() < deadline) {
         if (page.frames().some((frame) => /job_app/i.test(frame.url()))) {
             return;
         }
+
+        if (await pageHasApplicationForm(page)) {
+            emit("application_opened", { method: "inline-form" });
+            return;
+        }
+
         await page.waitForTimeout(250);
     }
 }
@@ -192,6 +225,11 @@ async function detectCompanyName(page) {
         if (/greenhouse\.io$/i.test(hostname) && segments.length > 0) {
             return formatCompanyName(segments[0]);
         }
+
+        const hostCompany = hostname.split(".")[0].replace(/^www$/i, "");
+        if (hostCompany && !/greenhouse|myworkdayjobs/i.test(hostCompany)) {
+            return formatCompanyName(hostCompany);
+        }
     } catch {
         return null;
     }
@@ -271,6 +309,72 @@ async function fillEducationFields(root, profile, emit) {
     }
 }
 
+async function findWorkHistoryField(root, fieldName, index) {
+    const suffix = `--${index}`;
+    const selectors = [
+        `#${fieldName}${suffix}`,
+        `[id="${fieldName}${suffix}"]`,
+        `input[name="${fieldName}${suffix}"]`,
+        `select[id^="${fieldName}"]`
+    ];
+
+    for (const selector of selectors) {
+        const field = root.locator(selector).first();
+        if (await field.count() > 0) {
+            return field;
+        }
+    }
+
+    return null;
+}
+
+async function fillWorkHistory(root, profile, emit) {
+    const history = profile.workHistory || [];
+    if (!history.length) {
+        return;
+    }
+
+    await root.locator(".experience--form, input[id^='company-name'], #company-name--0")
+        .first()
+        .waitFor({ state: "attached", timeout: 10000 })
+        .catch(() => {});
+
+    for (let index = 0; index < history.length; index += 1) {
+        const job = history[index];
+        const entries = [
+            { field: "company-name", value: job.company },
+            { field: "title", value: job.title },
+            { field: "start-month", value: job.startMonth },
+            { field: "start-year", value: job.startYear },
+            { field: "end-month", value: job.current ? "I currently work here" : job.endMonth },
+            { field: "end-year", value: job.current ? "" : job.endYear }
+        ];
+
+        for (const entry of entries) {
+            if (!entry.value) {
+                continue;
+            }
+
+            const field = await findWorkHistoryField(root, entry.field, index);
+            if (!field) {
+                continue;
+            }
+
+            try {
+                const role = (await field.getAttribute("role") || "").toLowerCase();
+                if (role === "combobox" || (await field.evaluate((el) => el.tagName.toLowerCase())) === "select") {
+                    await selectOption(field, entry.value, root);
+                } else {
+                    await fillField(field, entry.value, root);
+                }
+                emit("field_filled", { field: `${entry.field}--${index}` });
+            } catch (error) {
+                emit("field_failed", { field: `${entry.field}--${index}`, message: error.message });
+            }
+        }
+    }
+}
+
 async function fillLocationCombobox(root, profile, emit) {
     if (profile.country) {
         const countryField = root.locator("select#country, #country").first();
@@ -312,16 +416,27 @@ async function fillLocationCombobox(root, profile, emit) {
     }
 }
 
-async function prepareGreenhouseApplication(page, profile, emit) {
+async function prepareGreenhouseApplication(page, profile, emit, applicationContext = {}) {
     await activateApplication(page, emit);
     const root = await findApplicationRoot(page);
     await root.locator(FIELD_SELECTOR).first().waitFor({ state: "visible", timeout: 15000 });
-    const targetCountry = await detectTargetCountry(page, root);
-    const companyName = await detectCompanyName(page);
-    emit("target_country_detected", { targetCountry });
+
+    const pageCountry = await detectTargetCountry(page, root);
+    const pageCompany = await detectCompanyName(page);
+    const targetCountry = applicationContext.targetCountry || pageCountry;
+    const companyName = applicationContext.companyName || pageCompany;
+    const fillContext = {
+        targetCountry,
+        companyName,
+        jobLocation: applicationContext.jobLocation || null,
+        jobUrl: applicationContext.jobUrl || page.url()
+    };
+
+    emit("target_country_detected", { targetCountry, source: applicationContext.targetCountry ? "job_metadata" : "page_text" });
     emit("company_detected", { companyName });
     await fillLocationCombobox(root, profile, emit);
-    const result = await fillKnownFields(root, profile, emit, { targetCountry, companyName });
+    await fillWorkHistory(root, profile, emit);
+    const result = await fillKnownFields(root, profile, emit, fillContext);
     const resumeUploaded = await uploadResume(root, profile, emit);
     const manualReviewRequired = await findManualReviewFields(root);
 

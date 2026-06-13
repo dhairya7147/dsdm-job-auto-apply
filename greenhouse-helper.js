@@ -6,11 +6,62 @@ function escapeRegExp(value) {
     return String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
+function getPageScope(root) {
+    if (!root) {
+        return null;
+    }
+
+    if (root.keyboard) {
+        return root;
+    }
+
+    if (typeof root.page === "function") {
+        return root.page();
+    }
+
+    return root;
+}
+
+async function waitScope(root, ms) {
+    const page = getPageScope(root);
+    if (!page) {
+        return;
+    }
+
+    await page.waitForTimeout(ms);
+}
+
+async function pressEscape(root) {
+    const page = getPageScope(root);
+    if (!page?.keyboard) {
+        return;
+    }
+
+    await page.keyboard.press("Escape").catch(() => {});
+}
+
+function containsWholeTerm(haystack, needle) {
+    if (!needle || needle.length < 2) {
+        return false;
+    }
+
+    const re = new RegExp(`\\b${escapeRegExp(needle)}\\b`, "i");
+    return re.test(haystack);
+}
+
 function optionMatches(option, value) {
     const candidate = normalize(option);
     const requested = normalize(value);
 
-    if (candidate === requested || candidate.includes(requested) || requested.includes(candidate)) {
+    if (candidate === requested) {
+        return true;
+    }
+
+    if (requested.length >= 2 && containsWholeTerm(candidate, requested)) {
+        return true;
+    }
+
+    if (candidate.length >= 2 && containsWholeTerm(requested, candidate)) {
         return true;
     }
 
@@ -29,11 +80,23 @@ function optionMatches(option, value) {
     if (requested === "computer science") {
         return candidate.includes("computer science");
     }
-    if (requested === "no") {
-        return /^(no\b|i am not\b|not a\b|none\b|i do not\b)/.test(candidate);
+    if (requested === "no" || requested === "opt-out" || requested === "opt out") {
+        return /^(no\b|i am not\b|not a\b|none\b|i do not\b|opt[\s-]?out\b)/.test(candidate);
     }
-    if (requested === "yes") {
-        return /^(yes\b|i am\b|i have\b)/.test(candidate);
+    if (requested === "yes" || requested === "opt-in" || requested === "opt in") {
+        return /^(yes\b|i am\b|i have\b|opt[\s-]?in\b|i agree\b|agree\b)/.test(candidate);
+    }
+    if (/not a protected veteran|i am not a protected veteran/i.test(requested)) {
+        return /not a protected veteran|don't wish|do not wish|prefer not/i.test(candidate)
+            && !/identify as one or more/i.test(candidate);
+    }
+    if (/do not have a disability|don't have a disability|no.*disability/i.test(requested)) {
+        return (/do not have a disability|don't have a disability|not have a disability|no, i do not have a disability/i.test(candidate)
+            || (requested.includes("not have") && candidate.includes("not have") && candidate.includes("disability")))
+            && !/yes.*disability/i.test(candidate);
+    }
+    if (/i do not want to answer|don't wish to answer/i.test(requested)) {
+        return /do not want to answer|don't wish to answer|decline to self-identify/i.test(candidate);
     }
 
     return false;
@@ -45,16 +108,49 @@ function findBestOption(options, value) {
         return exact;
     }
 
-    const partial = options.find((option) => optionMatches(option, value));
-    if (partial) {
-        return partial;
+    const matches = options.filter((option) => optionMatches(option, value));
+    if (matches.length > 0) {
+        const normalizedValue = normalize(value);
+        return matches.sort((left, right) => {
+            const leftNorm = normalize(left);
+            const rightNorm = normalize(right);
+            const leftExact = leftNorm === normalizedValue ? 0 : 1;
+            const rightExact = rightNorm === normalizedValue ? 0 : 1;
+            if (leftExact !== rightExact) {
+                return leftExact - rightExact;
+            }
+
+            const leftStarts = leftNorm.startsWith(normalizedValue) ? 0 : 1;
+            const rightStarts = rightNorm.startsWith(normalizedValue) ? 0 : 1;
+            if (leftStarts !== rightStarts) {
+                return leftStarts - rightStarts;
+            }
+
+            return leftNorm.length - rightNorm.length;
+        })[0];
     }
 
     const words = normalize(value).split(/\s+/).filter((word) => word.length > 3);
-    return options.find((option) => {
-        const candidate = normalize(option);
-        return words.some((word) => candidate.includes(word));
-    }) || null;
+    if (words.length === 0) {
+        return null;
+    }
+
+    const scored = options
+        .map((option) => {
+            const candidate = normalize(option);
+            const score = words.filter((word) => candidate.includes(word)).length;
+            return { option, score };
+        })
+        .filter((entry) => entry.score > 0)
+        .sort((left, right) => right.score - left.score);
+
+    const best = scored[0];
+    if (!best) {
+        return null;
+    }
+
+    const minimumScore = words.length >= 3 ? Math.ceil(words.length * 0.6) : words.length;
+    return best.score >= minimumScore ? best.option : null;
 }
 
 function findStrictOption(options, value) {
@@ -65,10 +161,7 @@ function findStrictOption(options, value) {
         return exact;
     }
 
-    return options.find((option) => {
-        const candidate = normalize(option);
-        return candidate.includes(requested) || requested.includes(candidate);
-    }) || null;
+    return options.find((option) => optionMatches(option, value)) || null;
 }
 
 function resolveOptionMatch(labels, value, fallback = null, strict = false) {
@@ -138,8 +231,8 @@ async function commitComboboxValue(field, value) {
 
 async function selectGreenhouseFlyout(root, field, value, fallback = null, strict = false) {
     await field.scrollIntoViewIfNeeded().catch(() => {});
-    await root.keyboard.press("Escape").catch(() => {});
-    await root.waitForTimeout(150);
+    await pressEscape(root);
+    await waitScope(root, 80);
 
     const fieldId = await field.getAttribute("id") || "";
     const fieldName = [
@@ -148,7 +241,9 @@ async function selectGreenhouseFlyout(root, field, value, fallback = null, stric
         fieldId
     ].filter(Boolean).join(" ");
     const isSchool = /^school--/i.test(fieldId) || /\bschool\b/i.test(fieldName);
-    const searchable = isSchool || /discipline/i.test(fieldName);
+    const isCountryField = /\bcountry\b/i.test(fieldName);
+    const searchable = isSchool || /discipline/i.test(fieldName) || isCountryField;
+    const useStrict = strict || isCountryField;
     const targetValue = isSchool ? "Other" : value;
     const targetFallback = isSchool ? null : fallback;
 
@@ -156,35 +251,46 @@ async function selectGreenhouseFlyout(root, field, value, fallback = null, stric
         await field.click();
         await field.fill(String(targetValue));
 
-        for (let attempt = 0; attempt < 6; attempt += 1) {
-            await root.waitForTimeout(400);
-            if (await commitComboboxValue(field, targetValue)) {
-                await root.keyboard.press("Escape").catch(() => {});
-                return;
+        if (isCountryField) {
+            for (let attempt = 0; attempt < 8; attempt += 1) {
+                await waitScope(root, 200);
+                if (await clickOption(field, targetValue, targetFallback, true)) {
+                    await dispatchFieldEvents(field);
+                    await pressEscape(root);
+                    return;
+                }
+            }
+        } else {
+            for (let attempt = 0; attempt < 5; attempt += 1) {
+                await waitScope(root, 180);
+                if (await commitComboboxValue(field, targetValue)) {
+                    await pressEscape(root);
+                    return;
+                }
             }
         }
 
         if (isSchool) {
             await field.press("Enter");
             await dispatchFieldEvents(field);
-            await root.keyboard.press("Escape").catch(() => {});
+            await pressEscape(root);
             return;
         }
 
-        if (targetFallback) {
+        if (!isCountryField && targetFallback) {
             await field.fill(String(targetFallback));
-            for (let attempt = 0; attempt < 6; attempt += 1) {
-                await root.waitForTimeout(400);
+            for (let attempt = 0; attempt < 5; attempt += 1) {
+                await waitScope(root, 180);
                 if (await commitComboboxValue(field, targetFallback)) {
-                    await root.keyboard.press("Escape").catch(() => {});
+                    await pressEscape(root);
                     return;
                 }
             }
         }
 
-        if (await clickOption(field, targetValue, targetFallback, strict)) {
+        if (await clickOption(field, targetValue, targetFallback, useStrict)) {
             await dispatchFieldEvents(field);
-            await root.keyboard.press("Escape").catch(() => {});
+            await pressEscape(root);
             return;
         }
     }
@@ -196,17 +302,17 @@ async function selectGreenhouseFlyout(root, field, value, fallback = null, stric
         await field.click();
     }
 
-    await root.waitForTimeout(300);
+    await waitScope(root, 150);
 
-    if (await clickOption(field, value, fallback, strict)) {
+    if (await clickOption(field, value, fallback, useStrict)) {
         await dispatchFieldEvents(field);
-        await root.keyboard.press("Escape").catch(() => {});
+        await pressEscape(root);
         return;
     }
 
-    if (fallback && await clickOption(field, fallback, null, strict)) {
+    if (fallback && await clickOption(field, fallback, null, useStrict)) {
         await dispatchFieldEvents(field);
-        await root.keyboard.press("Escape").catch(() => {});
+        await pressEscape(root);
         return;
     }
 

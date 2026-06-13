@@ -18,13 +18,19 @@ const KNOWN_COUNTRIES = [
     "Sweden",
     "Poland",
     "Israel",
-    "United Arab Emirates"
+    "United Arab Emirates",
+    "Serbia",
+    "Netherlands"
 ];
 
 const LOCATION_HINTS = [
     { pattern: /\b(united states|u\.?s\.?a?\.?|america)\b/i, country: "United States" },
     { pattern: /\b(united kingdom|u\.?k\.?|england|scotland|wales)\b/i, country: "United Kingdom" },
     { pattern: /\b(india|bangalore|bengaluru|gurgaon|gurugram|hyderabad|mumbai|pune|noida|delhi|chennai)\b/i, country: "India" },
+    { pattern: /\bin-bengaluru\b/i, country: "India" },
+    { pattern: /\bremote\s*[-,]?\s*india\b/i, country: "India" },
+    { pattern: /\bhybrid\s*[-–]\s*(bangalore|bengaluru|mumbai|gurgaon|gurugram|hyderabad|pune|delhi|chennai)\b/i, country: "India" },
+    { pattern: /\b(india|bangalore|bengaluru|gurgaon|gurugram|hyderabad|mumbai|pune|noida|delhi|chennai),\s*ind(ia)?\b/i, country: "India" },
     { pattern: /\b(canada|toronto|vancouver|montreal)\b/i, country: "Canada" },
     { pattern: /\b(australia|sydney|melbourne)\b/i, country: "Australia" },
     { pattern: /\b(germany|berlin|munich)\b/i, country: "Germany" },
@@ -32,7 +38,7 @@ const LOCATION_HINTS = [
     { pattern: /\b(ireland|dublin)\b/i, country: "Ireland" },
     { pattern: /\b(netherlands|amsterdam)\b/i, country: "Netherlands" },
     { pattern: /\b(singapore)\b/i, country: "Singapore" },
-    { pattern: /\b(san francisco|bay area|mountain view|san mateo|seattle|austin|boston|chicago|los angeles|new york|california|,\s*ca\b|,\s*ny\b|,\s*wa\b|,\s*tx\b)/i, country: "United States" },
+    { pattern: /\b(santa clara|san francisco|bay area|mountain view|san mateo|seattle|austin|boston|chicago|los angeles|new york|california|,\s*ca\b|,\s*ny\b|,\s*wa\b|,\s*tx\b)/i, country: "United States" },
     { pattern: /\b(london|manchester|cambridge,\s*uk)\b/i, country: "United Kingdom" }
 ];
 
@@ -146,11 +152,37 @@ function resolveCitizenshipAuthorization(type, profile, targetCountry) {
 }
 
 function isWorkAuthorizationQuestion(question) {
-    return /(authorized|authorised).*(work|employment|lawfully)|(work|employment).*(authorized|authorised)|\bwork authorization\b/i.test(question);
+    return /(authorized|authorised).*(work|employment|lawfully)|(work|employment).*(authorized|authorised)|\bwork authorization\b|eligible to work|legally authorized to work|legally authorised to work|right to live and work/i.test(question);
 }
 
 function isSponsorshipQuestion(question) {
-    return /sponsor|sponsorship|immigration case|immigration support|visa|h-1b|work permit/i.test(question);
+    return /sponsor|sponsorship|immigration case|immigration support|visa|h-1b|work permit|need sponsorship for employment/i.test(question);
+}
+
+function isResidencyQuestion(question) {
+    if (/willing to relocat|relocate to|open to relocat/i.test(question)) {
+        return false;
+    }
+
+    if (/what country|which country|country are you based/i.test(question)) {
+        return false;
+    }
+
+    return /(currently|do you)\s+(reside|live)\s+(in|within)|based in|located in|currently located/i.test(question);
+}
+
+function resolveResidencyAnswer(question, profile, context = {}) {
+    if (!isResidencyQuestion(question)) {
+        return null;
+    }
+
+    const homeCountry = getHomeCountry(profile);
+    const targetCountry = resolveTargetCountry(question, context);
+    if (!homeCountry || !targetCountry) {
+        return null;
+    }
+
+    return countriesMatch(homeCountry, targetCountry) ? "Yes" : "No";
 }
 
 function resolveAuthorizationAnswer(type, question, profile, context = {}) {
@@ -182,9 +214,11 @@ module.exports = {
     countriesMatch,
     extractCountryFromText,
     getHomeCountry,
+    isResidencyQuestion,
     isSponsorshipQuestion,
     isWorkAuthorizationQuestion,
     normalizeCountry,
     resolveAuthorizationAnswer,
+    resolveResidencyAnswer,
     resolveTargetCountry
 };

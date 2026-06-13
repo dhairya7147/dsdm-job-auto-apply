@@ -1,6 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 const { formatCompanyName, normalizeQuestion } = require("./answer-engine");
+const { shouldIgnoreQuestion } = require("./question-filters");
 const { isSponsorshipQuestion, isWorkAuthorizationQuestion } = require("./authorization-policy");
 
 const LEDGER_FILE = "unanswered-ledger.json";
@@ -53,7 +54,11 @@ function mergePendingAnswers(profile, baseDir = process.cwd()) {
 }
 
 function recordUnanswered({ questions = [], jobUrl = null, companyName = null, baseDir = process.cwd(), artifactDir = null }) {
-    const cleaned = [...new Set(questions.map(cleanQuestionLabel).filter(Boolean))];
+    const cleaned = [...new Set(
+        questions
+            .map(cleanQuestionLabel)
+            .filter((question) => question && !shouldIgnoreQuestion(question))
+    )];
     if (cleaned.length === 0) {
         return { added: 0, ledgerPath: path.join(baseDir, LEDGER_FILE) };
     }

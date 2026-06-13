@@ -90,3 +90,21 @@ test("matches location screening questions from profile", () => {
         "Yes"
     );
 });
+
+test("does not map first or last name fields to generic Name custom answer", () => {
+    const nameProfile = {
+        ...profile,
+        firstName: "Dhanya",
+        lastName: "Nair",
+        fullName: "Dhanya Manoj Nair",
+        preferredName: "Dhanya",
+        customAnswers: {
+            Name: "Dhanya Manoj Nair"
+        }
+    };
+
+    assert.equal(getAnswer("First Name First Name first_name", nameProfile), "Dhanya");
+    assert.equal(getAnswer("Last Name Last Name last_name", nameProfile), "Nair");
+    assert.equal(getAnswer("Preferred First Name", nameProfile), "Dhanya");
+    assert.equal(getAnswer("Name", nameProfile), "Dhanya Manoj Nair");
+});

@@ -5,6 +5,8 @@
   "fullName": "Jane Alex Doe",
   "preferredName": "Jane",
   "email": "jane.doe@example.com",
+  "workdayPassword": "Dsdm260423!!",
+  "workdayAuthMode": "auto",
   "phone": "+1 555 010 1234",
   "city": "New York",
   "state": "New York",

@@ -3,6 +3,7 @@ const assert = require("node:assert/strict");
 const {
     extractCountryFromText,
     resolveAuthorizationAnswer,
+    resolveResidencyAnswer,
     resolveTargetCountry
 } = require("../authorization-policy");
 const { getAnswer } = require("../answer-engine");
@@ -89,6 +90,17 @@ test("getAnswer wires authorization questions through policy", () => {
     assert.equal(
         getAnswer("Are you authorized to work in this country?", indiaProfile, { targetCountry: "India" }),
         "Yes"
+    );
+});
+
+test("resolves residency from home country and job location", () => {
+    assert.equal(
+        resolveResidencyAnswer("Do you currently reside in India?", indiaProfile, { jobLocation: "Bengaluru, India" }),
+        "Yes"
+    );
+    assert.equal(
+        resolveResidencyAnswer("Do you currently reside in the United States?", indiaProfile, { jobLocation: "San Francisco" }),
+        "No"
     );
 });
 

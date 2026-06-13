@@ -36,6 +36,7 @@ build/
 profile.json
 pending-answers.json
 unanswered-ledger.json
+workday-accounts.json
 discovered-boards.json
 artifacts/
 *.log
