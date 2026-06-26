@@ -33,7 +33,6 @@ build/
 .vscode/
 
 ### Local application data ###
-profile.json
 data/pending-answers.json
 data/unanswered-ledger.json
 data/workday-accounts.json
