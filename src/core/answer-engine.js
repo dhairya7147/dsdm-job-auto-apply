@@ -168,6 +168,65 @@ const QUESTION_RULES = [
     { pattern: /what are your superpowers/i, key: "careerSuperpowers" },
     { pattern: /biggest career accomplishments/i, key: "careerAccomplishments" },
     { pattern: /biggest career lessons learned/i, key: "careerLessonsLearned" },
+    { pattern: /where have you most recently worked|most recently worked/i, key: "currentEmployer" },
+    { pattern: /where do you plan on working from|payroll tax purposes/i, key: "workFromAddress" },
+    { pattern: /where are you currently located/i, key: "currentLocation" },
+    { pattern: /current\/last company/i, key: "currentEmployer" },
+    { pattern: /other url/i, key: "otherUrl" },
+    { pattern: /replit profile url/i, key: "replitProfileUrl" },
+    { pattern: /share something you built with replit/i, key: "replitProjectShare" },
+    { pattern: /where did you find this job posting/i, key: "source" },
+    { pattern: /snowflake candidate privacy notice/i, key: "consentToPrivacyNotice" },
+    { pattern: /hands-on experience with infrastructure concepts/i, key: "infrastructureExperienceRating" },
+    { pattern: /technology you have the most experience with|select the technology you have the most experience/i, key: "primaryTechnology" },
+    { pattern: /examples of exceptional performance you want to highlight/i, key: "exceptionalWorkAnswer" },
+    { pattern: /which engineering areas are you most interested in/i, key: "engineeringAreaInterest" },
+    { pattern: /how'd you get into programming|how did you get into programming/i, key: "programmingOrigin" },
+    { pattern: /plan on working from our nyc or sf office|willing to work out of our sf or nyc office/i, key: "hybridOfficeWilling" },
+    { pattern: /something you've built recently|something you have built recently/i, key: "recentBuildDescription" },
+    { pattern: /rate plaid.?s position in ai|position in ai compared to other tech companies/i, key: "plaidAiRating" },
+    { pattern: /technical domain do you prefer|prefer to work in and have most expertise/i, key: "technicalDomainPreference" },
+    { pattern: /percentage of time do you generally enjoy spending coding/i, key: "codingTimePercentage" },
+    { pattern: /most significant technical achievement/i, key: "careerAccomplishments" },
+    { pattern: /where can we find samples of your code/i, key: "github" },
+    { pattern: /publications, papers or research/i, key: "peerReviewedPublications" },
+    { pattern: /example or evidence of your exceptional ability/i, key: "exceptionalWorkAnswer" },
+    { pattern: /where can we learn more about you/i, key: "portfolio" },
+    { pattern: /arbitration agreement/i, key: "consentAcknowledgement" },
+    { pattern: /singapore citizen|australia citizen|basis of your working rights|if you answered yes, please indicate the basis/i, key: "foreignWorkRightsBasis" },
+    { pattern: /how did you hear about this position/i, key: "source" },
+    { pattern: /u\.s\. person.*status|which of the following best describes your .?u\.s\. person.? status/i, key: "snowflakeUsPersonStatus" },
+    { pattern: /why are you interested in working at plaid/i, key: "plaidInterestReasons" },
+    { pattern: /preferred work location|where would you like to work/i, key: "preferredWorkLocations" },
+    { pattern: /consent to receiving text messages|text message updates/i, key: "smsConsent" },
+    { pattern: /country of residence/i, key: "countryOfResidence" },
+    { pattern: /annual salary range requirement|salary range requirement/i, key: "salaryRangeRequirement" },
+    { pattern: /available to work from our office|open to work from the office by default|comfortable working fully on-site|ready to commit to our hybrid work model/i, key: "officeAvailabilityWilling" },
+    { pattern: /contractual obligations.*axon|impact, impede or interfere with your ability to join axon/i, key: "axonContractualObligations" },
+    { pattern: /art\.?\s*13\s*gdpr|notification to candidates acc/i, key: "gdprArticle13Consent" },
+    { pattern: /neurodiversity/i, key: "neurodiversity" },
+    { pattern: /ethnic or cultural background/i, key: "ethnicOrCulturalBackground" },
+    { pattern: /^please specify/i, key: "pleaseSpecifyFollowUp" },
+    { pattern: /talent pool/i, key: "talentPoolConsent" },
+    { pattern: /^future consideration$/i, key: "futureOpportunitiesOptIn" },
+    { pattern: /autoidentifica[cç][aã]o.*étnico-racial|étnico-racial/i, key: "brazilEthnicBackground" },
+    { pattern: /autoidentifica[cç][aã]o.*identidade de gênero|identidade de gênero/i, key: "brazilGenderIdentity" },
+    { pattern: /autoidentifica[cç][aã]o.*\bgênero\b/i, key: "brazilGender" },
+    { pattern: /autoidentifica[cç][aã]o.*orienta[cç][aã]o sexual|orienta[cç][aã]o sexual/i, key: "brazilSexualOrientation" },
+    { pattern: /possui alguma defici[eê]ncia/i, key: "brazilDisability" },
+    { pattern: /concorda em fornecer as informa[cç][oõ]es de diversidade/i, key: "brazilDiversityConsent" },
+    { pattern: /professional references and criminal record checks/i, key: "referencesAndBackgroundChecks" },
+    { pattern: /verification of both your identity and authorization to work/i, key: "identityWorkAuthorizationVerification" },
+    { pattern: /deemed export license|ear - controlled technology/i, key: "deemedExportLicense" },
+    { pattern: /which programming language\(s\) do you have experience with/i, key: "programmingLanguagesExperience" },
+    { pattern: /experience with golang/i, key: "goComfortable" },
+    { pattern: /based in vilnius/i, key: "basedInVilnius" },
+    { pattern: /office in pinheiros|office in florianópolis/i, key: "officeAvailabilityWilling" },
+    { pattern: /advanced programming experience with/i, key: "advancedProgrammingTechnologies" },
+    { pattern: /when are you available to start/i, key: "noticePeriod" },
+    { pattern: /cjis requirements|lawful permanent resident status due to cjis/i, key: "cjisUsCitizenship" },
+    { pattern: /currently hold italian citizenship/i, key: "italianCitizenship" },
+    { pattern: /prohibited possessor questionnaire/i, key: "prohibitedPossessorAcknowledgement" },
     { pattern: /if you answered "other" above, please note your graduation date/i, key: "otherGraduationDateNote" },
     { pattern: /do you use ai\/llms|use ai\/llms in your daily/i, key: "aiWorkflowStory" },
     { pattern: /using looker/i, key: "lookerExperience" },
@@ -313,6 +372,12 @@ function getCountryAnswer(valuesByCountry, targetCountry) {
 
 function normalizeQuestion(question) {
     return String(question || "")
+        .replace(/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/gi, " ")
+        .replace(/-labeled-(checkbox|radio)-\d+/gi, " ")
+        .replace(/Type here\.{3}/gi, " ")
+        .replace(/Start typing\.{3}/gi, " ")
+        .replace(/Search schools\.{3}/gi, " ")
+        .replace(/OpenAI may use Artificial Intelligence with this application\. Learn more\./gi, " ")
         .replace(/\s+/g, " ")
         .replace(/\*/g, "")
         .trim();
@@ -503,6 +568,35 @@ function resolveRelocationAnswer(normalized) {
     return null;
 }
 
+function resolveConsentStatementAnswer(normalized, profile) {
+    if (/^i confirm that i have read the privacy policy/i.test(normalized)) {
+        return profile.consentToPrivacyNotice || "Yes";
+    }
+
+    if (/^i (hereby )?(agree|confirm)|privacy policy|art\.?\s*13\s*gdpr|notification to candidates acc/i.test(normalized)) {
+        return profile.gdprArticle13Consent || profile.consentAcknowledgement || "Yes";
+    }
+
+    if (/talent pool|future consideration|contacted should a similar vacancy/i.test(normalized)) {
+        return profile.talentPoolConsent || profile.gdprRetentionConsent || profile.futureOpportunitiesOptIn || "Yes";
+    }
+
+    if (/^acknowledgment of receipt and review/i.test(normalized)
+        || /prohibited possessor questionnaire/i.test(normalized)) {
+        return profile.prohibitedPossessorAcknowledgement || profile.consentAcknowledgement || "Yes";
+    }
+
+    return null;
+}
+
+function resolveAxonScreeningAnswer(normalized, profile) {
+    if (/fugitive from justice|unlawful user of.*marijuana|under indictment|court order.*restraining you|adjudicated as a mental defective|misdemeanor crime of domestic violence|convicted in any court.*felony|discharged from the armed forces under dishonorable/i.test(normalized)) {
+        return profile.axonProhibitedPossessorAnswers || "No";
+    }
+
+    return null;
+}
+
 function getAnswer(question, profile, context = {}) {
     const normalized = normalizeQuestion(question);
 
@@ -607,6 +701,16 @@ function getAnswer(question, profile, context = {}) {
 
     if (isSponsorshipQuestion(normalized)) {
         return resolveAuthorizationAnswer("sponsorship", normalized, profile, context);
+    }
+
+    const consentAnswer = resolveConsentStatementAnswer(normalized, profile);
+    if (consentAnswer !== null) {
+        return consentAnswer;
+    }
+
+    const axonScreeningAnswer = resolveAxonScreeningAnswer(normalized, profile);
+    if (axonScreeningAnswer !== null) {
+        return axonScreeningAnswer;
     }
 
     const residencyAnswer = resolveResidencyAnswer(normalized, profile, context);
@@ -815,6 +919,9 @@ function getAnswer(question, profile, context = {}) {
     }
 
     if (rule.key === "hybridOfficeWilling" || rule.key === "onsiteRequirementWilling") {
+        if (/plan on working|willing to work out of our sf or nyc/i.test(normalized)) {
+            return profile.hybridOfficeNycSfAnswer || "Yes, open to SF or NYC";
+        }
         return profile.hybridOfficeWilling || "Yes";
     }
 
@@ -865,6 +972,196 @@ function getAnswer(question, profile, context = {}) {
 
     if (rule.key === "exceptionalWorkAnswer") {
         return profile.exceptionalWorkAnswer || null;
+    }
+
+    if (rule.key === "otherUrl") {
+        return profile.otherUrl || profile.github || "N/A";
+    }
+
+    if (rule.key === "replitProfileUrl") {
+        return profile.replitProfileUrl || "N/A";
+    }
+
+    if (rule.key === "snowflakeUsPersonStatus") {
+        return profile.snowflakeUsPersonStatus || "None of the above";
+    }
+
+    if (rule.key === "countryOfResidence") {
+        return profile.countryOfResidence || "Other";
+    }
+
+    if (rule.key === "plaidInterestReasons") {
+        return profile.plaidInterestReasons
+            || "Plaid's Products & Technical Innovation, Ability to Use and Build AI Products";
+    }
+
+    if (rule.key === "preferredWorkLocations") {
+        const jobLocation = String(context.jobLocation || "").toLowerCase();
+        if (jobLocation.includes("london")) {
+            return "London Office";
+        }
+        if (jobLocation.includes("san francisco") || jobLocation.includes("sf")) {
+            return "San Francisco HQ";
+        }
+        if (jobLocation.includes("new york") || jobLocation.includes("nyc")) {
+            return "New York City Office";
+        }
+        if (jobLocation.includes("remote")) {
+            return "Remote US";
+        }
+        return profile.preferredWorkLocations || "Remote US";
+    }
+
+    if (rule.key === "plaidAiRating") {
+        return profile.plaidAiRating || "3 - About average";
+    }
+
+    if (rule.key === "primaryTechnology") {
+        return profile.primaryTechnology || "Python";
+    }
+
+    if (rule.key === "engineeringAreaInterest") {
+        return profile.engineeringAreaInterest
+            || "Build the services that power core business functions like making payments, communicating with customers, or orchestrating app workflows.";
+    }
+
+    if (rule.key === "programmingOrigin") {
+        return profile.programmingOrigin
+            || "I got into programming through competitive programming and college coursework at MNNIT, then built stronger backend skills through internships and full-time work on Java/Spring Boot microservices.";
+    }
+
+    if (rule.key === "recentBuildDescription") {
+        return profile.recentBuildDescription || profile.genAiAgentsExperience || profile.exceptionalWorkAnswer || null;
+    }
+
+    if (rule.key === "technicalDomainPreference") {
+        return profile.technicalDomainPreference || "Back End";
+    }
+
+    if (rule.key === "codingTimePercentage") {
+        return profile.codingTimePercentage || "80%";
+    }
+
+    if (rule.key === "infrastructureExperienceRating") {
+        return profile.infrastructureExperienceRating || "Intermediate";
+    }
+
+    if (rule.key === "smsConsent") {
+        return profile.smsConsent ?? "Yes";
+    }
+
+    if (rule.key === "salaryRangeRequirement") {
+        return profile.salaryRangeRequirement
+            || profile.desiredSalaryIndia?.display
+            || profile.desiredSalary?.display
+            || "25 LPA INR";
+    }
+
+    if (rule.key === "officeAvailabilityWilling") {
+        return profile.officeAvailabilityWilling || profile.hybridOfficeWilling || "Yes";
+    }
+
+    if (rule.key === "axonContractualObligations") {
+        return profile.axonContractualObligations ?? "No";
+    }
+
+    if (rule.key === "gdprArticle13Consent") {
+        return profile.gdprArticle13Consent || profile.consentAcknowledgement || "Yes";
+    }
+
+    if (rule.key === "neurodiversity") {
+        return profile.neurodiversity || "Prefer not to answer";
+    }
+
+    if (rule.key === "ethnicOrCulturalBackground") {
+        return profile.ethnicOrCulturalBackground
+            || profile.demographics?.raceEthnicityDetail
+            || profile.demographics?.raceEthnicity
+            || "South Asian";
+    }
+
+    if (rule.key === "pleaseSpecifyFollowUp") {
+        return profile.pleaseSpecifyFollowUp || "N/A";
+    }
+
+    if (rule.key === "talentPoolConsent") {
+        return profile.talentPoolConsent || profile.gdprRetentionConsent || "Yes";
+    }
+
+    if (rule.key === "brazilEthnicBackground") {
+        return profile.brazilEthnicBackground || profile.demographics?.raceEthnicityDetail || "South Asian";
+    }
+
+    if (rule.key === "brazilGenderIdentity") {
+        return profile.brazilGenderIdentity || profile.demographics?.genderIdentity || "Woman";
+    }
+
+    if (rule.key === "brazilGender") {
+        return profile.brazilGender || profile.gender || "Female";
+    }
+
+    if (rule.key === "brazilSexualOrientation") {
+        return profile.brazilSexualOrientation || profile.demographics?.sexualOrientation || "Heterosexual";
+    }
+
+    if (rule.key === "brazilDisability") {
+        return profile.brazilDisability || profile.demographics?.disabilityStatus || "No";
+    }
+
+    if (rule.key === "brazilDiversityConsent") {
+        return profile.brazilDiversityConsent || profile.demographicConsent || "Yes";
+    }
+
+    if (rule.key === "referencesAndBackgroundChecks") {
+        return profile.referencesAndBackgroundChecks ?? "Yes";
+    }
+
+    if (rule.key === "identityWorkAuthorizationVerification") {
+        if (context.targetCountry && profile.workAuthorizationByCountry) {
+            const auth = getCountryAnswer(profile.workAuthorizationByCountry, context.targetCountry);
+            if (auth) {
+                return auth;
+            }
+        }
+        return profile.identityWorkAuthorizationVerification ?? "No";
+    }
+
+    if (rule.key === "deemedExportLicense") {
+        return profile.deemedExportLicense ?? "No";
+    }
+
+    if (rule.key === "programmingLanguagesExperience") {
+        return profile.programmingLanguagesExperience
+            || profile.pairedCodingLanguages
+            || "Java, Python, JavaScript/TypeScript, C++";
+    }
+
+    if (rule.key === "basedInVilnius") {
+        return profile.basedInVilnius ?? "No";
+    }
+
+    if (rule.key === "advancedProgrammingTechnologies") {
+        return profile.advancedProgrammingTechnologies || profile.coreTechnicalStack || null;
+    }
+
+    if (rule.key === "cjisUsCitizenship") {
+        return profile.cjisUsCitizenship ?? "No";
+    }
+
+    if (rule.key === "italianCitizenship") {
+        return profile.italianCitizenship ?? "No";
+    }
+
+    if (rule.key === "prohibitedPossessorAcknowledgement") {
+        return profile.prohibitedPossessorAcknowledgement || profile.consentAcknowledgement || "Yes";
+    }
+
+    if (rule.key === "foreignWorkRightsBasis") {
+        return profile.foreignWorkRightsBasis || "No";
+    }
+
+    if (rule.key === "replitProjectShare") {
+        return profile.replitProjectShare || profile.genAiAgentsExperience || null;
     }
 
     if (rule.key === "applicationConsent") {

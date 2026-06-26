@@ -5,12 +5,22 @@ const { recordUnanswered } = require("./answer-ledger");
 const { prepareApplication } = require("./application-preparer");
 const { buildApplicationContext, resolveGreenhouseApplyUrl } = require("./job-context");
 const { resolveAshbyApplicationUrl } = require("../platforms/ashby/metadata");
+const { resolveLeverApplicationUrl } = require("../platforms/lever/metadata");
+const { resolveSmartRecruitersApplicationUrl } = require("../platforms/smartrecruiters/metadata");
 const { detectPlatform } = require("./platform-registry");
 const { loadProfile } = require("./profile-loader");
 const { DEFAULT_WORKDAY_PASSWORD, resolveWorkdayAuthPlan } = require("../platforms/workday/accounts");
+const {
+    buildBrowserContextOptions,
+    buildBrowserLaunchArgs,
+    ensurePageEnglish
+} = require("./page-translation");
 
 function buildLaunchOptions(headless) {
-    const launchOptions = { headless };
+    const launchOptions = {
+        headless,
+        args: buildBrowserLaunchArgs()
+    };
     const browserChannel = process.env.JOB_AUTO_APPLY_BROWSER_CHANNEL;
     if (browserChannel) {
         launchOptions.channel = browserChannel;
@@ -51,6 +61,10 @@ async function runApplication({
         navigationUrl = resolveGreenhouseApplyUrl(jobUrl);
     } else if (platform === "ashby") {
         navigationUrl = resolveAshbyApplicationUrl(jobUrl);
+    } else if (platform === "lever") {
+        navigationUrl = resolveLeverApplicationUrl(jobUrl);
+    } else if (platform === "smartrecruiters") {
+        navigationUrl = await resolveSmartRecruitersApplicationUrl(jobUrl);
     }
     if (navigationUrl !== jobUrl) {
         emit("apply_url_resolved", { originalUrl: jobUrl, navigationUrl });
@@ -58,6 +72,7 @@ async function runApplication({
 
     await page.goto(navigationUrl, { waitUntil: "domcontentloaded", timeout: 45000 });
     emit("page_loaded", { title: await page.title(), finalUrl: page.url() });
+    await ensurePageEnglish(page, emit);
 
     const applicationContext = await buildApplicationContext(jobUrl, {
         jobLocation: jobLocation || undefined
@@ -162,7 +177,7 @@ async function runStandalone(options, emit = null) {
 
     try {
         browser = await launchBrowser(options.headless, emitEvent);
-        const context = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
+        const context = await browser.newContext(buildBrowserContextOptions());
         page = await context.newPage();
 
         await runApplication({
@@ -221,6 +236,7 @@ async function runStandalone(options, emit = null) {
 }
 
 module.exports = {
+    buildBrowserContextOptions,
     buildLaunchOptions,
     launchBrowser,
     runApplication,

@@ -1,11 +1,15 @@
 const { prepareAshbyApplication } = require("../platforms/ashby/adapter");
 const { prepareGreenhouseApplication } = require("../platforms/greenhouse/adapter");
+const { prepareLeverApplication } = require("../platforms/lever/adapter");
+const { prepareSmartRecruitersApplication } = require("../platforms/smartrecruiters/adapter");
 const { prepareWorkdayApplication } = require("../platforms/workday/adapter");
 const { requirePlatform } = require("./platform-registry");
 
 const ADAPTERS = {
     ashby: prepareAshbyApplication,
     greenhouse: prepareGreenhouseApplication,
+    lever: prepareLeverApplication,
+    smartrecruiters: prepareSmartRecruitersApplication,
     workday: prepareWorkdayApplication
 };
 

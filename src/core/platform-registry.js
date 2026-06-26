@@ -10,6 +10,14 @@ const PLATFORMS = [
     {
         id: "ashby",
         matches: (url) => /ashbyhq\.com/i.test(url.hostname)
+    },
+    {
+        id: "lever",
+        matches: (url) => /lever\.co/i.test(url.hostname)
+    },
+    {
+        id: "smartrecruiters",
+        matches: (url) => /smartrecruiters\.com/i.test(url.hostname)
     }
 ];
 

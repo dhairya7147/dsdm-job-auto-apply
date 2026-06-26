@@ -2,7 +2,11 @@ const path = require("path");
 const { extractCountryFromText } = require("../../core/authorization-policy");
 const { formatCompanyName, getAnswer, normalizeQuestion } = require("../../core/answer-engine");
 const {
+    fillAshbyCheckboxGroups,
+    fillAshbyComboboxes,
+    fillAshbyEducationHistory,
     fillAshbyLocationCombobox,
+    fillAshbyYesNoButtons,
     getAshbyFieldLabel,
     getAshbyRadioGroupQuestion,
     pickAshbyQuestionLabel,
@@ -105,6 +109,12 @@ async function fillKnownFields(root, profile, emit, context = {}) {
     for (let index = 0; index < count; index += 1) {
         const field = fields.nth(index);
         if (!await field.isVisible().catch(() => false) || !await field.isEnabled().catch(() => false)) {
+            continue;
+        }
+
+        const fieldId = await field.getAttribute("id") || "";
+        if (/_systemfield_education_history-(startDate|endDate)/i.test(fieldId)
+            || await field.locator("xpath=ancestor::*[@id='_systemfield_education_history-startDate' or @id='_systemfield_education_history-endDate']").count() > 0) {
             continue;
         }
 
@@ -222,13 +232,21 @@ async function prepareAshbyApplication(page, profile, emit, applicationContext =
     emit("company_detected", { companyName });
 
     await fillAshbyLocationCombobox(page, profile, emit);
+    const educationResult = await fillAshbyEducationHistory(page, profile, emit);
+    const comboboxResult = await fillAshbyComboboxes(page, profile, emit, fillContext);
+    const buttonResult = await fillAshbyYesNoButtons(page, profile, emit, fillContext);
     const radioResult = await fillAshbyRadioGroups(page, profile, emit, fillContext);
+    const checkboxResult = await fillAshbyCheckboxGroups(page, profile, emit, fillContext);
     const fieldResult = await fillKnownFields(page, profile, emit, fillContext);
     const resumeUploaded = await uploadResume(page, profile, emit);
     const manualReviewRequired = await findManualReviewFields(page);
 
     const unanswered = [...new Set([
+        ...educationResult.unanswered,
+        ...comboboxResult.unanswered,
+        ...buttonResult.unanswered,
         ...radioResult.unanswered,
+        ...checkboxResult.unanswered,
         ...fieldResult.unanswered
     ])];
 
@@ -236,7 +254,12 @@ async function prepareAshbyApplication(page, profile, emit, applicationContext =
         provider: "ashby",
         companyName,
         targetCountry,
-        filled: radioResult.filled + fieldResult.filled,
+        filled: educationResult.filled
+            + comboboxResult.filled
+            + buttonResult.filled
+            + radioResult.filled
+            + checkboxResult.filled
+            + fieldResult.filled,
         unanswered,
         resumeUploaded,
         manualReviewRequired

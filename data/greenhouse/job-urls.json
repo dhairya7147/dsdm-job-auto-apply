@@ -1,146 +1,302 @@
 [
   {
-    "company": "Anchanto",
-    "title": "Software Engineer- Ruby on Rails",
-    "location": "Pune, India",
-    "url": "https://job-boards.greenhouse.io/anchanto/jobs/4645089003"
-  },
-  {
-    "company": "Atomicwork",
-    "title": "Backend Engineer",
+    "company": "Augury",
+    "title": "Full Stack Developer",
     "location": "Bengaluru, India",
-    "url": "https://job-boards.greenhouse.io/atomicwork/jobs/4143684008"
+    "url": "https://www.augury.com/careers/8574864002?gh_jid=8574864002"
   },
   {
-    "company": "Atomicwork",
-    "title": "Backend Engineer - Search",
-    "location": "Bengaluru, Karnataka",
-    "url": "https://job-boards.greenhouse.io/atomicwork/jobs/4645648008"
+    "company": "Authenticinsurance",
+    "title": "Associate Program Developer",
+    "location": "Dayton, Ohio, United States",
+    "url": "https://job-boards.greenhouse.io/authenticinsurance/jobs/4267728009"
   },
   {
-    "company": "Brex",
-    "title": "Software Engineer II, Cloud Infrastructure",
-    "location": "São Paulo, São Paulo, Brazil",
-    "url": "https://www.brex.com/careers/8587789002?gh_jid=8587789002"
+    "company": "Authenticinsurance",
+    "title": "Software Engineer - Data",
+    "location": "New York, New York, United States",
+    "url": "https://job-boards.greenhouse.io/authenticinsurance/jobs/4114316009"
   },
   {
-    "company": "Datadog",
-    "title": "Software Engineer - Early Career",
-    "location": "Lisbon, Portugal",
-    "url": "https://careers.datadoghq.com/detail/7646452/?gh_jid=7646452"
-  },
-  {
-    "company": "DevRev",
-    "title": "Software Engineer - Applied AI ",
-    "location": "Philippines Remote",
-    "url": "https://job-boards.greenhouse.io/devrev/jobs/5722574004"
-  },
-  {
-    "company": "Glean",
-    "title": "Software Engineer, AI Infrastructure",
-    "location": "Mountain View, CA, United States",
-    "url": "https://job-boards.greenhouse.io/gleanwork/jobs/4501783005"
-  },
-  {
-    "company": "HackerRank",
-    "title": "Backend Engineer II",
-    "location": "Hybrid in Santa Clara, CA, United States",
-    "url": "https://job-boards.greenhouse.io/hackerrank/jobs/7729186"
-  },
-  {
-    "company": "HackerRank",
-    "title": "Backend Engineer II",
-    "location": "Hybrid in Bangalore, India",
-    "url": "https://job-boards.greenhouse.io/hackerrank/jobs/7698434"
-  },
-  {
-    "company": "Lyft",
-    "title": "Software Engineer, Android",
-    "location": "Mexico City, Mexico",
-    "url": "https://app.careerpuck.com/job-board/lyft/job/8558174002?gh_jid=8558174002"
-  },
-  {
-    "company": "Mercury",
+    "company": "Authenticinsurance",
     "title": "Software Engineer - Product",
-    "location": "San Francisco, CA, New York, NY, Portland, OR, or Remote within Canada or United States",
-    "url": "https://job-boards.greenhouse.io/mercury/jobs/5267749004"
+    "location": "New York, New York, United States",
+    "url": "https://job-boards.greenhouse.io/authenticinsurance/jobs/4114314009"
   },
   {
-    "company": "Project44",
-    "title": "Software Engineer - Backend",
-    "location": "Bangalore",
-    "url": "https://job-boards.greenhouse.io/project44/jobs/7179793"
+    "company": "Autoproff",
+    "title": "Software Engineer ",
+    "location": "Copenhagen (Denmark)",
+    "url": "https://job-boards.greenhouse.io/autoproff/jobs/7698063003"
   },
   {
-    "company": "Rakuten Symphony",
-    "title": "Software Engineer Back-End",
-    "location": "Belfast",
-    "url": "https://symphony.com/company/apply?gh_jid=7768294"
+    "company": "Autotradercanada",
+    "title": "Software Engineer",
+    "location": "Toronto, ON (Canada)",
+    "url": "https://job-boards.greenhouse.io/autotradercanada/jobs/7771586003"
   },
   {
-    "company": "Samsara",
-    "title": "Software Engineer II, AI Platform",
-    "location": "Remote - CA",
-    "url": "https://www.samsara.com/company/careers/roles/7619925?gh_jid=7619925"
+    "company": "Avepoint",
+    "title": "Backend Developer",
+    "location": "Singapore",
+    "url": "https://job-boards.greenhouse.io/avepoint/jobs/6290872"
   },
   {
-    "company": "Scopely",
-    "title": "Software Engineer (Unity)",
-    "location": "IN - Bangalore, India",
-    "url": "https://job-boards.greenhouse.io/scopely/jobs/5180560008?gh_jid=5180560008"
+    "company": "Avepoint",
+    "title": "Full Stack Developer (Angular, .NET, SQL)",
+    "location": "Singapore",
+    "url": "https://job-boards.greenhouse.io/avepoint/jobs/7372194"
   },
   {
-    "company": "Scopely",
-    "title": "Web Tools Backend Engineer_Monopoly GO!",
-    "location": "ES - Barcelona, Spain",
-    "url": "https://job-boards.greenhouse.io/scopely/jobs/5156257008?gh_jid=5156257008"
+    "company": "Avepoint",
+    "title": "Full Stack Engineer",
+    "location": "Singapore",
+    "url": "https://job-boards.greenhouse.io/avepoint/jobs/6358379"
   },
   {
-    "company": "SingleStore India",
-    "title": "Software Engineer | Observability",
-    "location": "Portugal",
-    "url": "https://job-boards.greenhouse.io/singlestore/jobs/7868624"
+    "company": "Avepoint",
+    "title": "JUNIOR SERVICE ENGINEER (DANANG)",
+    "location": "Da Nang, Da Nang, Vietnam",
+    "url": "https://job-boards.greenhouse.io/avepoint/jobs/6825857"
   },
   {
-    "company": "Tekion Corp",
-    "title": "Software Engineer II",
-    "location": "Chennai, Tamil Nadu, India",
-    "url": "https://job-boards.greenhouse.io/tekion/jobs/7650990003"
+    "company": "Avepoint",
+    "title": "JUNIOR SOFTWARE DEVELOPER (BI)",
+    "location": "Da Nang, Da Nang, Vietnam",
+    "url": "https://job-boards.greenhouse.io/avepoint/jobs/6820881"
   },
   {
-    "company": "Together AI",
-    "title": "Backend Software Engineer — Data Platform & AI Data Products",
-    "location": "San Francisco",
-    "url": "https://job-boards.greenhouse.io/togetherai/jobs/5064263007"
+    "company": "Avepoint",
+    "title": "Java Developer",
+    "location": "Manila, Philippines",
+    "url": "https://job-boards.greenhouse.io/avepoint/jobs/7095518"
   },
   {
-    "company": "Tripadvisor",
-    "title": "Software Engineer II - Android",
-    "location": "Krakow, Poland",
-    "url": "https://job-boards.greenhouse.io/tripadvisor/jobs/7920764"
+    "company": "Avepoint",
+    "title": "Java Developer ",
+    "location": "Singapore",
+    "url": "https://job-boards.greenhouse.io/avepoint/jobs/6603726"
   },
   {
-    "company": "Weights & Biases",
-    "title": " Software Engineer, Kubernetes Core Interfaces",
-    "location": "Livingston, NJ / New York, NY, United States",
-    "url": "https://coreweave.com/careers/job?4656273006&board=coreweave&gh_jid=4656273006"
+    "company": "Avepoint",
+    "title": "Java Developer ",
+    "location": "Singapore",
+    "url": "https://job-boards.greenhouse.io/avepoint/jobs/6296649"
   },
   {
-    "company": "Weights & Biases",
-    "title": "Software Engineer II, Developer Experience",
-    "location": "Livingston, NJ / New York, NY / Sunnyvale, CA / Bellevue, WA, United States",
-    "url": "https://coreweave.com/careers/job?4678606006&board=coreweave&gh_jid=4678606006"
+    "company": "Avepoint",
+    "title": "Junior Java Developer (Managed Services)",
+    "location": "Singapore",
+    "url": "https://job-boards.greenhouse.io/avepoint/jobs/7811099"
   },
   {
-    "company": "Weights & Biases",
-    "title": "Software Engineer, Kubernetes",
-    "location": "Livingston, NJ / New York, NY / Sunnyvale, CA / Bellevue, WA, United States",
-    "url": "https://coreweave.com/careers/job?4577764006&board=coreweave&gh_jid=4577764006"
+    "company": "Avepoint",
+    "title": "Junior Software Developer - Da Nang",
+    "location": "Da Nang, Da Nang, Vietnam",
+    "url": "https://job-boards.greenhouse.io/avepoint/jobs/5038012"
   },
   {
-    "company": "Weights & Biases",
-    "title": "Software Engineer, Observability",
-    "location": "New York, NY / Sunnyvale, CA, United States",
-    "url": "https://coreweave.com/careers/job?4587675006&board=coreweave&gh_jid=4587675006"
+    "company": "Avepoint",
+    "title": "Junior Software Developer - Hanoi",
+    "location": "Hanoi, Hanoi, Vietnam",
+    "url": "https://job-boards.greenhouse.io/avepoint/jobs/6200673"
+  },
+  {
+    "company": "Avepoint",
+    "title": "OPS and CR Full-Stack Developer (React & Java)",
+    "location": "Singapore",
+    "url": "https://job-boards.greenhouse.io/avepoint/jobs/7649221"
+  },
+  {
+    "company": "Avepoint",
+    "title": "SOFTWARE ENGINEER",
+    "location": "Hanoi, Hanoi, Vietnam",
+    "url": "https://job-boards.greenhouse.io/avepoint/jobs/6767508"
+  },
+  {
+    "company": "Avepoint",
+    "title": "Software Developer",
+    "location": "Singapore",
+    "url": "https://job-boards.greenhouse.io/avepoint/jobs/7649227"
+  },
+  {
+    "company": "Avepoint",
+    "title": "Software Developer",
+    "location": "Singapore",
+    "url": "https://job-boards.greenhouse.io/avepoint/jobs/6943970"
+  },
+  {
+    "company": "Avepoint",
+    "title": "Software Engineer",
+    "location": "Singapore",
+    "url": "https://job-boards.greenhouse.io/avepoint/jobs/6761596"
+  },
+  {
+    "company": "Avepoint",
+    "title": "Software Engineer (Jira)",
+    "location": "Singapore",
+    "url": "https://job-boards.greenhouse.io/avepoint/jobs/7936095"
+  },
+  {
+    "company": "Avimedical",
+    "title": "Fullstack Engineer (all genders)",
+    "location": "Munich",
+    "url": "https://job-boards.eu.greenhouse.io/avimedical/jobs/4721279101"
+  },
+  {
+    "company": "Avomdincdbaavo",
+    "title": "Software Engineer - Integrations Team",
+    "location": "US - NY Area or Remote",
+    "url": "https://job-boards.greenhouse.io/avomdincdbaavo/jobs/4188130009"
+  },
+  {
+    "company": "Avride",
+    "title": "C++ Software Engineer – Control",
+    "location": "Austin, Texas, United States",
+    "url": "https://job-boards.greenhouse.io/avride/jobs/4028830009"
+  },
+  {
+    "company": "Avride",
+    "title": "C++ Software Engineer – Motion Planning",
+    "location": "Austin, Texas, United States",
+    "url": "https://job-boards.greenhouse.io/avride/jobs/4013017009"
+  },
+  {
+    "company": "Avride",
+    "title": "Software Engineer – Localization & Mapping",
+    "location": "Austin, Texas, United States",
+    "url": "https://job-boards.greenhouse.io/avride/jobs/4013235009"
+  },
+  {
+    "company": "Avride",
+    "title": "Software Engineer – Simulation Backend",
+    "location": "Austin, Texas, United States",
+    "url": "https://job-boards.greenhouse.io/avride/jobs/4013074009"
+  },
+  {
+    "company": "Awin",
+    "title": "Full-Stack Engineer (f/m/d)",
+    "location": "Iași, Iași, Romania",
+    "url": "https://job-boards.greenhouse.io/awin/jobs/7737040003"
+  },
+  {
+    "company": "Awin",
+    "title": "Junior Software Engineer (f/m/d)",
+    "location": "Iași, Iași, Romania",
+    "url": "https://job-boards.greenhouse.io/awin/jobs/7747642003"
+  },
+  {
+    "company": "Awin",
+    "title": "Software Engineer (f/m/d)",
+    "location": "Iași, Iași, Romania",
+    "url": "https://job-boards.greenhouse.io/awin/jobs/7721615003"
+  },
+  {
+    "company": "Axios",
+    "title": "Software Engineer",
+    "location": "Remote",
+    "url": "https://job-boards.greenhouse.io/axios/jobs/7818788"
+  },
+  {
+    "company": "Axon",
+    "title": "Field Deployment Engineer, Professional Services",
+    "location": "Italy",
+    "url": "https://job-boards.greenhouse.io/axon/jobs/7136633003"
+  },
+  {
+    "company": "Axon",
+    "title": "Software Engineer II - C++/Rust",
+    "location": "Kassel, Hesse, Germany",
+    "url": "https://job-boards.greenhouse.io/axon/jobs/7617831003"
+  },
+  {
+    "company": "Axon",
+    "title": "Supplier Development Engineer II (Onsite)",
+    "location": "Scottsdale, Arizona, United States",
+    "url": "https://job-boards.greenhouse.io/axon/jobs/7732272003"
+  },
+  {
+    "company": "Backblaze",
+    "title": "Software Engineer",
+    "location": "Remote - Argentina; Remote - Colombia ; Remote - Costa Rica ; Remote - Mexico",
+    "url": "https://job-boards.greenhouse.io/backblaze/jobs/5205128008"
+  },
+  {
+    "company": "Backblaze",
+    "title": "Software Engineer - III  ",
+    "location": "Remote - Argentina; Remote - Colombia ; Remote - Costa Rica ; Remote - Mexico",
+    "url": "https://job-boards.greenhouse.io/backblaze/jobs/5204282008"
+  },
+  {
+    "company": "Backblaze",
+    "title": "Software Engineer Backend - Foundation Services",
+    "location": "Remote - Argentina; Remote - Colombia ; Remote - Costa Rica ; Remote - Mexico",
+    "url": "https://job-boards.greenhouse.io/backblaze/jobs/5222856008"
+  },
+  {
+    "company": "Backblaze",
+    "title": "Software Engineer, Backend - Organization Services",
+    "location": "Remote - Argentina; Remote - Colombia ; Remote - Costa Rica ; Remote - Mexico",
+    "url": "https://job-boards.greenhouse.io/backblaze/jobs/5204266008"
+  },
+  {
+    "company": "Bancopan",
+    "title": "Engenheiro(a) de Software Full Stack (Pleno/Sênior) | Dados",
+    "location": "São Paulo",
+    "url": "https://job-boards.greenhouse.io/bancopan/jobs/5844468004"
+  },
+  {
+    "company": "Bancopan",
+    "title": "IT Coordenador Backend - Crédito Veiculos & Crédito Consignado",
+    "location": "São Paulo",
+    "url": "https://job-boards.greenhouse.io/bancopan/jobs/5815062004"
+  },
+  {
+    "company": "Bayasystems",
+    "title": "Software Engineer",
+    "location": "Bengaluru, Karnataka, India",
+    "url": "https://job-boards.greenhouse.io/bayasystems/jobs/4533006008"
+  },
+  {
+    "company": "Bees",
+    "title": "Intermediate Java Developer",
+    "location": "Campinas, São Paulo, Brazil",
+    "url": "https://job-boards.greenhouse.io/bees/jobs/8594072002"
+  },
+  {
+    "company": "Bees",
+    "title": "Intermediate Java Developer",
+    "location": "Campinas, São Paulo, Brazil",
+    "url": "https://job-boards.greenhouse.io/bees/jobs/8588857002"
+  },
+  {
+    "company": "Bellroy",
+    "title": "Software Engineer - Functional Programming (AU & NZ)",
+    "location": "Collingwood, Victoria, Australia",
+    "url": "https://job-boards.greenhouse.io/bellroy/jobs/7829585"
+  },
+  {
+    "company": "Betsson",
+    "title": "Backend Software Engineer",
+    "location": "Sweden",
+    "url": "https://job-boards.greenhouse.io/betsson/jobs/1759805"
+  },
+  {
+    "company": "Betsson",
+    "title": "Player Management - Backend Software Engineer",
+    "location": "Budapest",
+    "url": "https://job-boards.greenhouse.io/betsson/jobs/7092345"
+  },
+  {
+    "company": "Betsson",
+    "title": "Player Management - Fullstack Software Engineer",
+    "location": "Budapest",
+    "url": "https://job-boards.greenhouse.io/betsson/jobs/7694097"
+  },
+  {
+    "company": "Betsson",
+    "title": "Software Engineers (Backend .NET/C#)",
+    "location": "Buenos Aires",
+    "url": "https://job-boards.greenhouse.io/betsson/jobs/7785707"
   }
 ]

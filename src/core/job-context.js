@@ -3,6 +3,8 @@ const { extractCountryFromText, normalizeCountry } = require("./authorization-po
 const { formatCompanyName } = require("./answer-engine");
 const { detectPlatform } = require("./platform-registry");
 const { fetchAshbyJobMetadata } = require("../platforms/ashby/metadata");
+const { fetchLeverJobMetadata } = require("../platforms/lever/metadata");
+const { fetchSmartRecruitersJobMetadata } = require("../platforms/smartrecruiters/metadata");
 const { fetchWorkdayJobMetadata, parseWorkdayJobUrl } = require("../platforms/workday/metadata");
 
 function inferBoardFromHostname(hostname) {
@@ -137,6 +139,10 @@ async function buildApplicationContext(jobUrl, overrides = {}) {
         metadata = await fetchGreenhouseJobMetadata(jobUrl);
     } else if (platform === "ashby") {
         metadata = await fetchAshbyJobMetadata(jobUrl);
+    } else if (platform === "lever") {
+        metadata = await fetchLeverJobMetadata(jobUrl);
+    } else if (platform === "smartrecruiters") {
+        metadata = await fetchSmartRecruitersJobMetadata(jobUrl);
     }
 
     const jobLocation = overrides.jobLocation || metadata?.location || null;

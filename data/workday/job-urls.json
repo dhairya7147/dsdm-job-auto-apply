@@ -1,38 +1,56 @@
 [
   {
-    "company": "NVIDIA",
-    "title": "Software Engineer, SPE",
-    "location": "Israel, Yokneam (active — use your existing NVIDIA account)",
-    "url": "https://nvidia.wd5.myworkdayjobs.com/en-US/NVIDIAExternalCareerSite/job/Israel-Yokneam/Software-Engineer--SPE_JR2015623"
+    "company": "Cadence Design Systems",
+    "title": "Application Engineer - Physical Design (Back-End)",
+    "location": "2 Locations",
+    "url": "https://cadence.wd1.myworkdayjobs.com/job/PETAH-TIKVA/Application-Engineer---Physical-Design--Back-End-_R54943"
   },
   {
-    "company": "Johnson Controls",
-    "title": "Software Engineer",
-    "location": "Pune, India",
-    "url": "https://jci.wd5.myworkdayjobs.com/en-US/JCI/job/Pune-Maharashtra-India/Software-Engineer_WD30269822"
+    "company": "Cadence Design Systems",
+    "title": "Application Engineer - Physical Design (Back-End)",
+    "location": "PETAH TIKVA",
+    "url": "https://cadence.wd1.myworkdayjobs.com/job/PETAH-TIKVA/Application-Engineer---Physical-Design--Back-End-_R54944"
   },
   {
-    "company": "HP",
-    "title": "Software Engineer",
-    "location": "Bangalore, India",
-    "url": "https://hp.wd5.myworkdayjobs.com/ExternalCareerSite/job/Bangalore-Karnataka-India/Software-Engineer_3152311-1"
+    "company": "Cadence Design Systems",
+    "title": "Software Engineer II",
+    "location": "SAN JOSE",
+    "url": "https://cadence.wd1.myworkdayjobs.com/job/SAN-JOSE/Software-Engineer-II_R52336-2"
   },
   {
-    "company": "Motorola Solutions",
-    "title": "Software Engineer",
-    "location": "Bangalore, India",
-    "url": "https://motorolasolutions.wd5.myworkdayjobs.com/Careers/job/Bangalore-India/Software-Engineer_R44661"
+    "company": "Cadence Design Systems",
+    "title": "Software Engineer II - AI Focused",
+    "location": "BELO HORIZONTE",
+    "url": "https://cadence.wd1.myworkdayjobs.com/job/BELO-HORIZONTE/Software-Engineer-II---AI-Focused_R54711"
   },
   {
-    "company": "Visa",
-    "title": "Staff Software Engineer (Python, Gen AI)",
-    "location": "Bengaluru, India",
-    "url": "https://visa.wd5.myworkdayjobs.com/en-US/Visa/job/IN---Bengaluru-India/Staff-Software-Engineer_REF080861W"
+    "company": "Cadence Design Systems",
+    "title": "Software Engineer II : AI Compiler Engineer",
+    "location": "BELO HORIZONTE",
+    "url": "https://cadence.wd1.myworkdayjobs.com/job/BELO-HORIZONTE/Software-Engineer-II---AI-Compiler-Engineer_R54898"
   },
   {
-    "company": "Alcon",
-    "title": "Software Engineer Apprentice",
-    "location": "Bangalore, India",
-    "url": "https://alcon.wd5.myworkdayjobs.com/en-US/careers_alcon/job/Bangalore-India/Software-Engineer---Apprentice_R-2026-47155"
+    "company": "Cadence Design Systems",
+    "title": "Software Engineer II, AI Platform",
+    "location": "SAN JOSE",
+    "url": "https://cadence.wd1.myworkdayjobs.com/job/SAN-JOSE/Software-Engineer-II--AI-Platform_R55030-1"
+  },
+  {
+    "company": "Diconium digital solutions GmbH",
+    "title": "Backend Developer (all genders)",
+    "location": "2 Locations",
+    "url": "https://diconium.wd3.myworkdayjobs.com/job/Lisbon/Backend-Developer--all-genders-_JR100443"
+  },
+  {
+    "company": "Etsy",
+    "title": "Software Engineer II, Machine Learning, Risk Engineering Brooklyn, Brooklyn Heights, New York, United States, 11201 Data Science & Machine Learning",
+    "location": "Unknown",
+    "url": "https://careers.etsy.com/jobs/software-engineer-ii-machine-learning-risk-engineering-brooklyn-new-york-united-states"
+  },
+  {
+    "company": "Nvidia",
+    "title": "Physical Design Backend Engineer",
+    "location": "Israel, Yokneam",
+    "url": "https://nvidia.wd5.myworkdayjobs.com/job/Israel-Yokneam/Physical-Design-Backend-Engineer_JR2015705"
   }
 ]

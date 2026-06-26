@@ -112,6 +112,59 @@ async function getFieldLabel(field) {
     });
 }
 
+const SELECT_SKIP_PATTERN = /^(school|degree|discipline|country|start-month|start-year|end-month|end-year|company-name|title)/i;
+
+async function fillSelectDropdowns(root, profile, emit, context = {}) {
+    const selects = root.locator("select");
+    const count = await selects.count();
+    const handledKeys = new Set();
+    const unanswered = [];
+    let filled = 0;
+
+    for (let index = 0; index < count; index += 1) {
+        const field = selects.nth(index);
+        if (!await field.isVisible().catch(() => false) || !await field.isEnabled().catch(() => false)) {
+            continue;
+        }
+
+        const id = await field.getAttribute("id") || "";
+        const name = await field.getAttribute("name") || "";
+        const key = id || name || `select-${index}`;
+        if (SELECT_SKIP_PATTERN.test(key) || handledKeys.has(key)) {
+            continue;
+        }
+
+        const currentValue = await field.inputValue().catch(() => "");
+        if (currentValue && !/^select/i.test(currentValue)) {
+            handledKeys.add(key);
+            continue;
+        }
+
+        const label = normalizeQuestion(await getFieldLabel(field));
+        const answer = getAnswer(label, profile, context);
+        if (!answer) {
+            if (label && !unanswered.includes(label)) {
+                unanswered.push(label);
+            }
+            continue;
+        }
+
+        try {
+            await selectOption(field, answer, root);
+            handledKeys.add(key);
+            filled += 1;
+            emit("field_filled", { field: label || key, type: "select" });
+        } catch (error) {
+            emit("field_failed", { field: label || key, message: error.message, type: "select" });
+            if (label && !unanswered.includes(label)) {
+                unanswered.push(label);
+            }
+        }
+    }
+
+    return { filled, unanswered };
+}
+
 async function fillKnownFields(root, profile, emit, context = {}) {
     const fields = root.locator(FIELD_SELECTOR);
     const count = await fields.count();
@@ -436,16 +489,18 @@ async function prepareGreenhouseApplication(page, profile, emit, applicationCont
     emit("company_detected", { companyName });
     await fillLocationCombobox(root, profile, emit);
     await fillWorkHistory(root, profile, emit);
+    const selectResult = await fillSelectDropdowns(root, profile, emit, fillContext);
     const result = await fillKnownFields(root, profile, emit, fillContext);
     const resumeUploaded = await uploadResume(root, profile, emit);
     const manualReviewRequired = await findManualReviewFields(root);
+    const unanswered = [...new Set([...selectResult.unanswered, ...result.unanswered])];
 
     return {
         provider: "greenhouse",
         companyName,
         targetCountry,
-        filled: result.filled,
-        unanswered: result.unanswered,
+        filled: selectResult.filled + result.filled,
+        unanswered,
         resumeUploaded,
         manualReviewRequired
     };

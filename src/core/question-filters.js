@@ -38,7 +38,17 @@ const IGNORE_PATTERNS = [
     /^skip to main content$/i,
     /^yes$/i,
     /^resume resume/i,
-    /_systemfield_resume$/i
+    /_systemfield_resume$/i,
+    /^start date education history$/i,
+    /^end date still student\?$/i,
+    /^still student\?/i,
+    /^end date still student\?$/i,
+    /^school education history search schools/i,
+    /^https:\/\/example\.com/i,
+    /^(advanced|intermediate|basic|expert) \(/i,
+    /^\d+ - (slightly|about|well)/i,
+    /^(python|rust|c\/c\+\+|other|front end|back end) /i,
+    /^build (a new customer-facing|the services|platforms used|the automated systems)/i
 ];
 
 function shouldIgnoreQuestion(question) {

@@ -1,6 +1,6 @@
 const fs = require("fs");
 const path = require("path");
-const { launchBrowser, runApplication } = require("../core/apply-runner");
+const { buildBrowserContextOptions, launchBrowser, runApplication } = require("../core/apply-runner");
 const { loadProfile } = require("../core/profile-loader");
 const { syncPendingAnswers } = require("./sync-pending-answers");
 
@@ -12,6 +12,8 @@ const JOBS_FILE = process.env.JOB_URLS_FILE || "data/greenhouse/job-urls.json";
 const BATCH_OFFSET = Number(process.env.BATCH_OFFSET || 0);
 const BATCH_LIMIT = Number(process.env.BATCH_LIMIT || 0);
 const TAB_DELAY_MS = Number(process.env.TAB_DELAY_MS || 1200);
+const BATCH_HEADLESS = process.env.JOB_AUTO_APPLY_HEADLESS === "true";
+const BATCH_AUTO_CLOSE = process.env.BATCH_AUTO_CLOSE === "true";
 const PROFILE_PATH = process.env.JOB_AUTO_APPLY_PROFILE || "profile.json";
 const BASE_DIR = path.resolve(__dirname, "../..");
 
@@ -56,8 +58,8 @@ async function run() {
         browser: process.env.JOB_AUTO_APPLY_BROWSER_CHANNEL || "chrome"
     });
 
-    const browser = await launchBrowser(false, emit);
-    const context = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
+    const browser = await launchBrowser(BATCH_HEADLESS, emit);
+    const context = await browser.newContext(buildBrowserContextOptions());
     const summary = [];
 
     for (let index = 0; index < jobs.length; index += 1) {
@@ -88,7 +90,7 @@ async function run() {
                 jobUrl: job.url,
                 profilePath: path.join(BASE_DIR, PROFILE_PATH),
                 artifactDir,
-                headless: false,
+                headless: BATCH_HEADLESS,
                 reviewTimeoutMs: -1,
                 jobLocation: job.location || null
             });
@@ -143,10 +145,16 @@ async function run() {
     });
 
     emit("awaiting_manual_review", {
-        message: "All tabs prepared. Browser will stay open until you close it."
+        message: BATCH_AUTO_CLOSE
+            ? "All tabs prepared. Closing browser."
+            : "All tabs prepared. Browser will stay open until you close it."
     });
 
-    await new Promise((resolve) => browser.on("disconnected", resolve));
+    if (BATCH_AUTO_CLOSE) {
+        await browser.close();
+    } else {
+        await new Promise((resolve) => browser.on("disconnected", resolve));
+    }
 }
 
 run().catch((error) => {

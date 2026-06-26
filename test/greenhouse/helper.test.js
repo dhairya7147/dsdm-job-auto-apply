@@ -35,6 +35,10 @@ test("matches common demographic option wording", () => {
     assert.equal(optionMatches("I am not a protected veteran", "No"), true);
     assert.equal(optionMatches("No, I do not have a disability", "No"), true);
     assert.equal(optionMatches("Yes", "No"), false);
+    assert.equal(optionMatches("I confirm", "Yes"), true);
+    assert.equal(optionMatches("I acknowledge", "Yes"), true);
+    assert.equal(optionMatches("I hereby agree", "Yes"), true);
+    assert.equal(optionMatches("I do not confirm", "No"), true);
     assert.equal(
         optionMatches(
             "I IDENTIFY AS ONE OR MORE OF THE CLASSIFICATIONS OF PROTECTED VETERANS LISTED ABOVE",

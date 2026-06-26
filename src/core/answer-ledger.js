@@ -16,6 +16,8 @@ function cleanQuestionLabel(question) {
         .replace(/\s+(company-name-\d+|title-\d+|end-date-month-\d+|end-date-year-\d+)$/i, "")
         .replace(/^(School|Degree|Discipline)\s+\1$/i, "$1")
         .replace(/^(GitHub|Portfolio|Website|Other)\s+\1$/i, "$1")
+        .replace(/^(Start Date|End Date)\s+Education History$/i, "$1 Education History")
+        .replace(/^Still Student\?\s+Still Student\?.*$/i, "Still Student?")
         .replace(/(.{80,})\s+\1$/i, "$1")
         .trim();
 }

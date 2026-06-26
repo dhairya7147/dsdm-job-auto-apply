@@ -49,6 +49,35 @@ function containsWholeTerm(haystack, needle) {
     return re.test(haystack);
 }
 
+function isAffirmativeAnswer(value) {
+    const requested = normalize(value);
+    if (!requested) {
+        return false;
+    }
+
+    if (/^(yes|true|1|agree|accepted|confirm|acknowledge)$/i.test(requested)) {
+        return true;
+    }
+
+    return optionMatches("I confirm", value)
+        || optionMatches("I acknowledge", value)
+        || optionMatches("I agree", value);
+}
+
+function isNegativeAnswer(value) {
+    const requested = normalize(value);
+    if (!requested) {
+        return false;
+    }
+
+    if (/^(no|false|0|decline|refuse|deny)$/i.test(requested)) {
+        return true;
+    }
+
+    return optionMatches("I do not confirm", value)
+        || optionMatches("I decline", value);
+}
+
 function optionMatches(option, value) {
     const candidate = normalize(option);
     const requested = normalize(value);
@@ -81,10 +110,13 @@ function optionMatches(option, value) {
         return candidate.includes("computer science");
     }
     if (requested === "no" || requested === "opt-out" || requested === "opt out") {
-        return /^(no\b|i am not\b|not a\b|none\b|i do not\b|opt[\s-]?out\b)/.test(candidate);
+        return /^(no\b|i am not\b|not a\b|none\b|i do not\b|i don't\b|opt[\s-]?out\b|decline\b|i disagree\b|i decline\b)/.test(candidate)
+            || /\bi do not (agree|consent|confirm|acknowledge)\b/.test(candidate);
     }
     if (requested === "yes" || requested === "opt-in" || requested === "opt in") {
-        return /^(yes\b|i am\b|i have\b|opt[\s-]?in\b|i agree\b|agree\b)/.test(candidate);
+        return /^(yes\b|i am\b|i have\b|opt[\s-]?in\b|i agree\b|agree\b|i confirm\b|i acknowledge\b|i hereby agree\b|i hereby consent\b|i have read\b|i accept\b|acknowledge\b|confirm\b)/.test(candidate)
+            || /\bi (confirm|acknowledge|agree|consent|accept)\b/.test(candidate)
+            || /\b(i have read and (understand|agree))\b/.test(candidate);
     }
     if (/not a protected veteran|i am not a protected veteran/i.test(requested)) {
         return /not a protected veteran|don't wish|do not wish|prefer not/i.test(candidate)
@@ -385,8 +417,7 @@ async function fillField(field, value, root = null) {
     }
 
     if (type === "checkbox") {
-        const affirmative = /^(yes|true|1|agree|accepted)$/i.test(String(value));
-        await field.setChecked(affirmative);
+        await field.setChecked(isAffirmativeAnswer(value));
         return;
     }
 
@@ -416,6 +447,8 @@ module.exports = {
     escapeRegExp,
     fillField,
     findBestOption,
+    isAffirmativeAnswer,
+    isNegativeAnswer,
     optionMatches,
     resolveOptionMatch,
     selectGreenhouseFlyout,
